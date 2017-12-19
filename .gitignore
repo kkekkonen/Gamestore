@@ -3,3 +3,4 @@
 !.gitignore
 __pycache__
 db*
+venv
