@@ -1,0 +1,19 @@
+{# TITLE HERE #}
+{% block title %}
+WEBSTORE HOMEPAGE
+{% endblock %}
+
+{% block content %}
+<div>
+  <div>
+  	{{username}}
+  </div>
+  <div>
+  	{% for permission in permissions %}
+    <div>
+      {{permission.name}}
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}
