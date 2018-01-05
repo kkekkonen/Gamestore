@@ -18,9 +18,12 @@ def give_dev_rights(user):
     permission = Permission.objects.get(codename="developer_rights")
     user.user_permissions.add(permission)
 
+def login(request):
+    return render(request, 'login.html')
+
 #@permission_required('website.developer_rigths')
 @login_required
-def home(request):
+def account(request):
 
     if not is_developer(request.user):
         give_dev_rights(request.user)
@@ -49,6 +52,9 @@ def signup(request):
     else:
         form = UserCreationForm()
     return render(request, 'signup.html', {'form': form})
+
+def home(request):
+    return render(request, 'home.html')
 
 def add_game(request):
     name = request.POST.get('name')
