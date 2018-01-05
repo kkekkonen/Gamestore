@@ -5,7 +5,9 @@ from django.db import models
 from django.contrib.auth.models import Permission
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, Http404
+from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
 from website.models import *
 from website.forms import *
 
@@ -26,11 +28,27 @@ def home(request):
     username = request.user.username
     permissions = Permission.objects.filter(user=request.user)
     games = Game.objects.all()
+    form = GameForm()
     context = {}
     context["games"] = games
     context["username"] = username
     context["permissions"] = permissions
+    context["form"] = form
     return render(request, 'homepage.html', context)
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('home')
+    else:
+        form = UserCreationForm()
+    return render(request, 'signup.html', {'form': form})
 
 def add_game(request):
     name = request.POST.get('name')

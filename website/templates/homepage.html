@@ -3,6 +3,8 @@
 WEBSTORE HOMEPAGE
 {% endblock %}
 
+<a href="{% url 'logout' %}">logout</a>
+
 {% block content %}
 <div>
   <div>
@@ -24,24 +26,15 @@ WEBSTORE HOMEPAGE
     </div>
     <form action="{% url 'add_game' %}" method="POST" id="game-form">
       {% csrf_token %}
-      <div>
-        <label for="game_name">Game name</label>
-        <div>
-          <input id="game_name" name="name" placeholder="Game name" type="text"/>
+      {% for field in form %}
+        <div class="fieldWrapper">
+          {{ field.errors }}
+          {{ field.label_tag }} {{ field }}
+          {% if field.help_text %}
+            <p class="help">{{ field.help_text|safe }}</p>
+          {% endif %}
         </div>
-      </div>
-      <div>
-        <label for="game_url">Game url</label>
-        <div>
-          <input id="game_url" name="url" placeholder="Url here" type="text"/>
-        </div>
-      </div>
-      <div>
-        <label for="game_description">Description</label>
-        <div>
-          <input id="game_description" name="description" placeholder=" " type="text"/>
-        </div>
-      </div>
+      {% endfor %}
       <button type="submit">
         <span></span>
         Add Game
