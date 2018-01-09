@@ -1,11 +1,82 @@
-{% block title %}Login{% endblock %}
+{% extends "base.html" %}
+
+{% block static-files %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+{% endblock static-files %}
 
 {% block content %}
-  <h2>Login</h2>
-  <form method="post">
+{% block message%}{% endblock message %}
+<form class="form-signin" method="POST">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Login</button>
-  </form>
-  <a href="{% url 'signup' %}">signup</a>
-{% endblock %}
+    <h2 class="form-signin-heading">Please sign in</h2>
+    <label for="username" class="sr-only">Username</label>
+    <input type="text" id="username" class="form-control" placeholder="Username..." required autofocus>
+    <label for="password" class="sr-only">Password</label>
+    <input type="password" id="password" class="form-control" placeholder="Password..." required>
+    <div class="checkbox">
+        <label>
+            <input type="checkbox" value="remember-me"> 
+            Remember me
+        </label>
+    </div>
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+    <p style='padding-top: 2%'>Don't have an account? Register <a href='{% url 'signup' %}'>here</a>.</p>
+</form>
+{% endblock content %}
+
+{% comment "Old placeholder" %}
+<a href="{% url 'logout' %}">logout</a>
+<div>
+    <div>
+  	    {{username}}
+    </div>
+    <div>
+  	    {% for permission in permissions %}
+            <div>
+                {{permission.name}}
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+{% if perms.website.developer_rights %}
+<div id=addGame>
+    <div>
+        <h3>Add Game</h3>
+    </div>
+    <form action="{% url 'add_game' %}" method="POST" id="game-form">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="fieldWrapper">
+            {{ field.errors }}
+            {{ field.label_tag }} {{ field }}
+            {% if field.help_text %}
+                <p class="help">{{ field.help_text|safe }}</p>
+            {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit">
+            <span></span>
+            Add Game
+        </button>
+    </form>
+</div>
+{% endif %}
+
+<div>
+    {% for game in games %}
+    <div>
+        <div>
+            {{game.name}}
+        </div>
+        <div>
+            <iframe src="{{game.url}}"  width="90%" height="100%"></iframe>
+        </div>
+        <div>
+            {{game.description}}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endcomment %}

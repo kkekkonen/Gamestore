@@ -18,8 +18,25 @@ def give_dev_rights(user):
     permission = Permission.objects.get(codename="developer_rights")
     user.user_permissions.add(permission)
 
+def handler404(request):
+    return render('registration/auth_error.html')
+
+def logout(request):
+    logout(request)
+    redirect(request, 'registration/logout.html')
+
 def login(request):
-    return render(request, 'login.html')
+    if request.method == 'GET':
+        return render(request, 'registration/login.html')
+    elif request.method == 'POST':
+        username = request.POST.username
+        raw_password = request.POST.password
+        user = authenticate(request, username=username, password=raw_password)
+        if user is not None:
+            login(request, user)
+            redirect('home')
+        else:
+            return render(request, 'registration/auth_error.html')
 
 #@permission_required('website.developer_rigths')
 @login_required
@@ -51,7 +68,7 @@ def signup(request):
             return redirect('home')
     else:
         form = UserCreationForm()
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'registration/signup.html', {'form': form})
 
 def home(request):
     return render(request, 'home.html')

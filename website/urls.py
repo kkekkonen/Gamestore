@@ -18,12 +18,13 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from . import views
 
+handler404 = 'website.views.handler404'
+
 urlpatterns = [
     path('', views.home, name='home'),
     path('account/', views.account, name='account'),
     path('login/', views.login, name='login'),
     path('signup/', views.signup, name='signup'),
-    path('accounts/login/', auth_views.login, name='login'),
     path('logout/', auth_views.logout, name='logout'),
     path('add_game', views.add_game, name='add_game'),
 ]
