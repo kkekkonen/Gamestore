@@ -22,9 +22,10 @@ handler404 = 'website.views.handler404'
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('account/', views.account, name='account'),
-    path('login/', views.login, name='login'),
-    path('signup/', views.signup, name='signup'),
-    path('logout/', auth_views.logout, name='logout'),
+    path('account/mygames', views.my_games, name='my_games'),
+    path('account/settings', views.settings, name='settings'),
+    path('account/login/', views.user_login, name='user_login'),
+    path('account/signup/', views.signup, name='signup'),
+    path('account/logout/', views.user_logout, name='user_logout'),
     path('add_game', views.add_game, name='add_game'),
 ]

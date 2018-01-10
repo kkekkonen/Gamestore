@@ -23,7 +23,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '78ewi@&h)rb4ri1@!7@a#or_!#wl$921@^z7@7%6ela(1_-h=f'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 LOGIN_REDIRECT_URL = 'home'
 
@@ -120,6 +120,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
-STATIC_ROOT = ''
+STATIC_ROOT = '/'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join('static'), )
+
+SESSION_COOKIE_AGE = 600
