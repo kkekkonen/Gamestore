@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if request.user.is_authenticated %}
+        <h6>Welcome to our magnificent gamestore, {{ request.user.username }}!</h6>
+    {% else %}
+        <h6>Welcome to our magnificent gamestore!</h6>
+    {% endif %}
+{% endblock content %}

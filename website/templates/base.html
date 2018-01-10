@@ -5,8 +5,10 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- Bootstrap CSS -->
+    <!-- CSS -->
+        {% load static %}
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css" integrity="sha384-Zug+QiDoJOrZ5t4lssLdxGhVrurbmBWopoEl+M6BdEfwnCJZtKxi1KgxUyJq13dy" crossorigin="anonymous">
+        <link rel="stylesheet" href="{% static "css/core.css" %}">
 
     <!-- Optional JavaScript -->
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
@@ -15,6 +17,7 @@
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/js/bootstrap.min.js" integrity="sha384-a5N7Y/aK3qNeh15eJKGWxsqtnX/wWdSZSKp+81YjTmS15nvnvxKHuzaWwXHDli+4" crossorigin="anonymous"></script>
 
         <title>Virtual Gamestore</title>
+        {% block static-files %}{% endblock static-files %}
     </head>
     <body>
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -26,7 +29,7 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav mr-auto">
                     <li class="nav-item active">
-                        <a class="nav-link" href="#">Home<span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="{% url 'home' %}">Home</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Categories</a>
@@ -36,8 +39,14 @@
                         Account
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" href="#">Login</a>
-                        <a class="dropdown-item" href="#">Sign up</a>
+                        {% if request.user.is_authenticated %}
+                            <a class="dropdown-item" href="{% url 'settings' %}">Settings</a>
+                            <a class="dropdown-item" href="{% url 'my_games' %}">My Games</a>
+                            <a class="dropdown-item" href="{% url 'user_logout' %}">Logout</a>
+                        {% else %}
+                            <a class="dropdown-item" href="{% url 'user_login' %}">Login</a>
+                            <a class="dropdown-item" href="{% url 'signup' %}">Sign up</a>
+                        {% endif %}
                     </div>
                     </li>
                 </ul>
@@ -47,5 +56,8 @@
                 </form>
             </div>
         </nav>
+        <div class="content">
+            {% block content %}{% endblock content %}
+        </div>
   </body>
 </html>

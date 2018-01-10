@@ -27,7 +27,7 @@ DEBUG = True
 
 LOGIN_REDIRECT_URL = 'home'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -120,4 +120,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
+STATIC_ROOT = '/'
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (os.path.join('static'), )
+
+SESSION_COOKIE_AGE = 600
