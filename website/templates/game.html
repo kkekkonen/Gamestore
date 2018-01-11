@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{# TITLE HERE #}
+{% block title %}
+WEBSTORE GAMEVIEW
+{% endblock %}
+{% block content %}
+{% if owned %}
+	<div>
+		<div>
+			{{game.name}}
+		</div>
+		<div>
+			<iframe src="{{game.url}}"  width="90%" height="100%"></iframe>
+		</div>
+		<div>
+			{{game.description}}
+		</div>
+  </div>
+{% else %}
+	<form action="http://payments.webcourse.niksula.hut.fi/pay/" method="POST">
+    <input type="hidden" name="pid" value={{ pid }} />
+    <input type="hidden" name="sid" value={{ sid }} />
+    <input type="hidden" name="success_url"
+            value={{ success_url }} />
+    <input type="hidden" name="cancel_url"
+            value="http://localhost:8000/payment/cancel" />
+    <input type="hidden" name="error_url"
+            value="http://localhost:8000/payment/error" />
+    <input type="hidden" name="checksum"
+            value={{ checksum }} />
+
+    <label for="id_amount">Amount</label>
+    <input type="text" id="id_amount" name="amount" value={{ amount }} />
+    <input type="submit" value="Accept Payment"/>
+	</form>
+{% endif %}
+{% endblock %}

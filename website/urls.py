@@ -25,5 +25,8 @@ urlpatterns = [
     path('signup/', views.signup, name='signup'),
     path('accounts/login/', auth_views.login, name='login'),
     path('logout/', auth_views.logout, name='logout'),
-    path('add_game', views.add_game, name='add_game')
+    path('add_game', views.add_game, name='add_game'),
+    path('games/<int:game_id>', views.game_view, name='game_view'),
+    path('games/<int:game_id>', views.game_view, name='game_view'),
+    path('games/<int:game_id>/buy', views.game_buy, name='game_buy')
 ]

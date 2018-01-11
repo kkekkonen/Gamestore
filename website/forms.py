@@ -9,3 +9,5 @@ class GameForm(forms.Form):
     error_messages={'required': 'Your game needs a URL!'})
     description = forms.CharField(label = 'Description', required = True,
     error_messages={'required': 'Your game needs a description for some reason!'})
+    price = forms.IntegerField(label = 'Price', required = True,
+    error_messages={'required': 'Your game needs a price!', 'min_value':'your game cannot cost less than 0!'}, min_value = 0)
