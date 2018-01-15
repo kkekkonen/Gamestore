@@ -39,31 +39,69 @@ def user_login(request):
             auth_login(request, user)
             return redirect(reverse('home'))
         else:
-            return render(request, 'registration/auth_error.html')
+            context = {
+                'message': 'Invalid login! Please try again.',
+                'message_type': 'bg-danger',
+            }
+            return render(request, 'registration/auth_error.html', context)
 
 #@permission_required('website.developer_rigths')
 @login_required
 def settings(request):
-    return render(request, 'registration/settings.html')
+    context = {
+        'username': request.user.username,
+        'first_name': request.user.first_name,
+        'last_name': request.user.last_name,
+        'email': request.user.email,
+    }
+    print(request.POST)
+    if request.method == 'GET':
+        return render(request, 'account/settings.html', context)
+    elif request.method == 'POST':
+        try:
+            user = User.objects.get(username=request.POST.get('username'))
+            user.username = request.POST.get('username')
+            user.first_name = request.POST.get('first_name')
+            user.last_name = request.POST.get('last_name')
+            user.email = request.POST.get('email')
+            user.set_password(request.POST.get('password1'))
+            user.save()
+            context['message'] = 'Account settings changed successfully!'
+            context['message_type'] = 'bg-success'
+            return redirect(reverse('user_login'), context)
+        except:
+            context['message'] = 'Something went wrong! Please try again.'
+            context['mesage_type'] = 'bg-danger'
+            return render(request, 'account/settings.html', context)
+
 
 def signup(request):
+    error_context = {
+        'message_type': 'bg-danger',
+        'message': 'Invalid form! Please try again.' 
+    }
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        print(request.POST)
+        form = SignupForm(request.POST)
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
-            raw_password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=raw_password)
+            raw_password = form.cleaned_data.get('password1')
+            user = auth_authenticate(request, username=username, password=raw_password)
             auth_login(request, user)
-            redirect('home')
-    else:
-        form = UserCreationForm()
-    return render(request, 'registration/signup.html', {'form': form})
+            return redirect(reverse('home'))
+        else:
+            return render(request, 'registration/signup.html', error_context)
+    elif request.method == 'GET':
+        return render(request, 'registration/signup.html')
 
 def home(request):
     return render(request, 'home.html')
 
 def my_games(request):
+    pass
+
+def verify_email(request):
     pass
 
 def add_game(request):
