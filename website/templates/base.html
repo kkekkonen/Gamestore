@@ -20,6 +20,17 @@
         {% block static-files %}{% endblock static-files %}
     </head>
     <body>
+        {% comment "initial work for announcement bar, must be redone. JUST found out about django message framework, must be converted to that." %}
+
+        {% block announcement %}
+            {% if announcement and announcement.strip %}
+                <div class="p-3 mb-2 bg-warning text-black" style='text-align: center'>{{ announcement }}</div>
+            {% endif %}
+        {% endblock announcement %}
+
+        {% endcomment %}
+        
+
         <nav class="navbar navbar-expand-lg navbar-light bg-light">
             <a class="navbar-brand" href="#">VG</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -56,6 +67,9 @@
                 </form>
             </div>
         </nav>
+
+        {% block message %}{% endblock message %}
+
         <div class="content">
             {% block content %}{% endblock content %}
         </div>

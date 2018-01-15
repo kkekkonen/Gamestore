@@ -5,8 +5,13 @@
     <link rel="stylesheet" href="{% static 'css/auth.css' %}">
 {% endblock static-files %}
 
+{% block message %}
+    {% if message and message.strip %}
+        <div class="p-3 mb-2 {{ message_type }} text-white" style='text-align: center'>{{ message }}</div>
+    {% endif %}
+{% endblock message %}
+
 {% block content %}
-{% block message%}{% endblock message %}
 <form class="form-signin" method="POST">
     {% csrf_token %}
     <h2 class="form-signin-heading">Please sign in</h2>
@@ -14,7 +19,7 @@
     <input name="password" type="password" class="form-control" placeholder="Password..." required>
     <div class="checkbox">
         <label>
-            <input type="checkbox" value="remember-me"> 
+            <input type="checkbox" value="remember-me">
             Remember me
         </label>
     </div>
