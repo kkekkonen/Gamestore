@@ -11,6 +11,7 @@ from django.contrib.auth.forms import UserCreationForm
 from website.models import *
 from website.forms import *
 from hashlib import md5
+import json
 from datetime import datetime
 
 def is_developer(user):
@@ -73,6 +74,7 @@ def add_game(request):
     else:
         print(form.errors)
         return HttpResponse(status=204)
+
 def make_checksum(pid, sid, amount, secret_key):
     checksumstr = "pid={}&sid={}&amount={}&token={}".format(pid, sid, amount, secret_key)
     m = md5(checksumstr.encode("ascii"))
@@ -105,6 +107,7 @@ def get_games(user):
     for purchase in purchases:
         games.append(purchase.game)
     return games
+
 def game_buy(request, game_id):
     if request.method == "GET":
         pid = request.GET["pid"]
@@ -129,3 +132,44 @@ def game_buy(request, game_id):
         else:
             url = "http://localhost:8000/games/" + str(game_id)
             return redirect(url)
+
+def save_score(request, game, score):
+    try:
+        score_int = int(score)
+        old_score = Score.objects.get(game=game, user=request.user)
+        if(int(score) > old_score.score):
+            old_score.delete()
+            Score.objects.create(game=game, user=request.user, score=request.POST.get("score"))
+    except Score.DoesNotExist:
+        Score.objects.create(game=game, user=request.user, score=request.POST.get("score"))
+    except ValueError:
+        return False
+    return True
+
+def load_gameState(request, game):
+    try:
+        items = GameState.objects.get(game=game, user=request.user).items.all()
+    except GameState.DoesNotExist:
+        items = []
+    try:
+        score = Score.objects.get(game=game, user=request.user).score
+    except Score.DoesNotExist:
+        score = 0
+    data = {"message": {"messageType": "LOAD", "gameState":{"playerItems": items, "score": score}}}
+    return data
+
+def game_request(request, game_id):
+    game = get_object_or_404(Game, pk=game_id)
+    print(request.POST)
+    if(request.method == "POST"):
+        messageType = request.POST.get('messageType')
+        if messageType == "SAVE":
+            return HttpResponse(status=204)
+        elif messageType == "SCORE":
+            save_score(request, game, request.POST.get("score"))
+            return HttpResponse(status=204)
+    else:
+        messageType = request.GET.get("messageType")
+        if messageType == "LOAD_REQUEST":
+            data = load_gameState(request, game)
+            return HttpResponse(json.dumps(data), content_type='application/json')
