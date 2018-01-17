@@ -56,19 +56,22 @@ def add_game(request):
     name = request.POST.get('name')
     url = request.POST.get('url')
     description = request.POST.get('description')
-    data = {"name":name, "url":url, "description":description}
+    price = request.POST.get('price')
+    data = {"name":name, "url":url, "description":description, "price":price}
     form = GameForm(data)
     if form.is_valid():
         game_data = {
             'name': form.cleaned_data['name'],
             'url': form.cleaned_data['url'],
             'description': form.cleaned_data['description'],
+            'price':form.cleaned_data['price'],
             'owner':request.user,
         }
         game = Game(**game_data)
         game.save()
         return redirect('home')
     else:
+        print(form.errors)
         return HttpResponse(status=204)
 def make_checksum(pid, sid, amount, secret_key):
     checksumstr = "pid={}&sid={}&amount={}&token={}".format(pid, sid, amount, secret_key)
@@ -80,20 +83,19 @@ def game_view(request, game_id):
     game = get_object_or_404(Game, pk=game_id)
     user_games = get_games(request.user)
     context = {}
+    context["game"] = game
     if game not in user_games:
         pid = "game" + str(game_id) + request.user.username
-        sid = ""
-        secret_key = "we need secret key"
+        sid = "IHaveSpentTooMuchTimeOnThisIDWSD20172018"
+        secret_key = "aa3dfa29c26efc70b4795f4cfb078f20"
         checksum = make_checksum(pid, sid, game.price, secret_key)
         context["amount"] = game.price
         context["owned"] = False
         context["pid"] = pid
         context["sid"] = sid
-        context["success_url"] = "http://localhost:8000/games/" + str(game_id)
+        context["success_url"] = "http://localhost:8000/games/" + str(game_id) + "/buy"
         context["checksum"]  = checksum
-        #you need to buy game
     else:
-        context["game"] = game
         context["owned"] = True
     return render(request, 'game.html', context)
 
@@ -109,14 +111,21 @@ def game_buy(request, game_id):
         ref = request.GET["ref"]
         result = request.GET["result"]
         checksum = request.GET["checksum"]
-        if result == "success":
+        checksumstr = "pid={}&ref={}&result={}&token={}".format(pid, ref, result, "aa3dfa29c26efc70b4795f4cfb078f20")
+        checksum_test = md5(checksumstr.encode("ascii")).hexdigest()
+        if result == "success" and checksum == checksum_test:
             game = Game.objects.get(pk=game_id)
-            Purchase.objects.create(game=game, user=request.user, timestamp=datetime.datetime.now())
+            if game not in get_games(request.user):
+                pass
+                Purchase.objects.create(game=game, user=request.user, timestamp=datetime.now())
             url = "http://localhost:8000/games/" + str(game_id)
             return redirect(url)
-        elif result == "cancel":
+        elif result == "cancel" and checksum == checksum_test:
+            #throw cancel page
             pass
         elif result == "error":
+            #throw error page
             pass
         else:
-            pass
+            url = "http://localhost:8000/games/" + str(game_id)
+            return redirect(url)

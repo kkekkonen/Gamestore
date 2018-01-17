@@ -6,33 +6,38 @@ WEBSTORE GAMEVIEW
 {% endblock %}
 {% block content %}
 {% if owned %}
-	<div>
-		<div>
+	<div id="gameWindow">
+		<div id="gameName">
 			{{game.name}}
 		</div>
-		<div>
+		<div id="iFrameWindow">
 			<iframe src="{{game.url}}"  width="90%" height="100%"></iframe>
 		</div>
-		<div>
+		<div id="gameDescription">
 			{{game.description}}
 		</div>
   </div>
 {% else %}
-	<form action="http://payments.webcourse.niksula.hut.fi/pay/" method="POST">
-    <input type="hidden" name="pid" value={{ pid }} />
-    <input type="hidden" name="sid" value={{ sid }} />
-    <input type="hidden" name="success_url"
-            value={{ success_url }} />
-    <input type="hidden" name="cancel_url"
-            value="http://localhost:8000/payment/cancel" />
-    <input type="hidden" name="error_url"
-            value="http://localhost:8000/payment/error" />
-    <input type="hidden" name="checksum"
-            value={{ checksum }} />
+	<div id="purchaseWindow" style="top:50%;left:50%;position:absolute;margin-right:-50%;transform: translate(-50%, -50%);">
+		<h4 style="text-align: center">You must buy the game first</h4>
+		<div style="text-align: center">{{game.name}}</div>
+		<div style="text-align: center">{{game.description}}</div>
+		<form action="http://payments.webcourse.niksula.hut.fi/pay/" method="POST">
+	    <input type="hidden" name="pid" value={{ pid }} />
+	    <input type="hidden" name="sid" value={{ sid }} />
+	    <input type="hidden" name="success_url"
+	            value={{ success_url }} />
+	    <input type="hidden" name="cancel_url"
+	            value="http://localhost:8000/payment/cancel" />
+	    <input type="hidden" name="error_url"
+	            value="http://localhost:8000/payment/error" />
+	    <input type="hidden" name="checksum"
+	            value={{ checksum }} />
 
-    <label for="id_amount">Amount</label>
-    <input type="text" id="id_amount" name="amount" value={{ amount }} />
-    <input type="submit" value="Accept Payment"/>
-	</form>
+	    <label for="id_amount">Price</label>
+	    <input type="text" id="id_amount" name="amount" value={{ amount }} />
+	    <input type="submit" value="Accept Payment"/>
+		</form>
+	</div>
 {% endif %}
 {% endblock %}
