@@ -146,30 +146,46 @@ def save_score(request, game, score):
         return False
     return True
 
-def load_gameState(request, game):
+def load_gameState(user, game):
     try:
-        items = GameState.objects.get(game=game, user=request.user).items.all()
+        items = GameState.objects.get(game=game, user=user).items.all()
     except GameState.DoesNotExist:
-        items = []
+        data = {"messageType": "ERROR", "info": "Gamestate could not be loaded"}
+        return data
     try:
-        score = Score.objects.get(game=game, user=request.user).score
+        score = Score.objects.get(game=game, user=user).score
     except Score.DoesNotExist:
         score = 0
-    data = {"message": {"messageType": "LOAD", "gameState":{"playerItems": items, "score": score}}}
+    items_str = list(map(str, items))
+    data = {"messageType": "LOAD", "gameState":{"playerItems": items_str, "score": score}}
     return data
+
+def save_gameState(request, game):
+    try:
+        GameState.objects.filter(user=request.user, game=game).delete()
+    except GameState.DoesNotExist:
+        pass
+    items = request.POST.getlist('gameState[playerItems][]')
+    score = request.POST.get('gameState[score]')
+    save_score(request, game, score)
+    gameState = GameState.objects.create(game=game, user=request.user)
+    for item in items:
+        item = Item.objects.create(name=item)
+        gameState.items.add(item)
+    return HttpResponse(status=204)
 
 def game_request(request, game_id):
     game = get_object_or_404(Game, pk=game_id)
-    print(request.POST)
     if(request.method == "POST"):
         messageType = request.POST.get('messageType')
         if messageType == "SAVE":
-            return HttpResponse(status=204)
+            save_gameState(request, game)
         elif messageType == "SCORE":
             save_score(request, game, request.POST.get("score"))
             return HttpResponse(status=204)
     else:
         messageType = request.GET.get("messageType")
         if messageType == "LOAD_REQUEST":
-            data = load_gameState(request, game)
+            data = load_gameState(request.user, game)
             return HttpResponse(json.dumps(data), content_type='application/json')
+    return HttpResponse(status=204)

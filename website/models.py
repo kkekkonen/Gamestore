@@ -21,6 +21,8 @@ class Game(models.Model):
     description = models.CharField(max_length=255)
     price = models.PositiveIntegerField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    def __str__(self):
+        return self.name
 
 class Purchase(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
@@ -35,7 +37,12 @@ class Score(models.Model):
 class Item(models.Model):
     name = models.CharField(max_length=255)
 
+    def __str__(self):
+        return self.name
+
 class GameState(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     items = models.ManyToManyField(Item)
+    def __str__(self):
+        return str(game) + " " + str(user)
