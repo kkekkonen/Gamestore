@@ -110,20 +110,21 @@ def get_games(user):
 
 def game_buy(request, game_id):
     if request.method == "GET":
-        pid = request.GET["pid"]
-        ref = request.GET["ref"]
-        result = request.GET["result"]
-        checksum = request.GET["checksum"]
+        pid_test = "game" + str(game_id) + request.user.username
+        pid = request.GET.get("pid", "")
+        ref = request.GET.get("ref", "")
+        result = request.GET.get("result", "")
+        checksum = request.GET.get("checksum", "")
         checksumstr = "pid={}&ref={}&result={}&token={}".format(pid, ref, result, "aa3dfa29c26efc70b4795f4cfb078f20")
         checksum_test = md5(checksumstr.encode("ascii")).hexdigest()
-        if result == "success" and checksum == checksum_test:
+        if result == "success" and checksum == checksum_test and pid == pid_test:
             game = Game.objects.get(pk=game_id)
             if game not in get_games(request.user):
                 pass
                 Purchase.objects.create(game=game, user=request.user, timestamp=datetime.now())
             url = "http://localhost:8000/games/" + str(game_id)
             return redirect(url)
-        elif result == "cancel" and checksum == checksum_test:
+        elif result == "cancel" and checksum == checksum_test and pid == pid_test:
             #throw cancel page
             pass
         elif result == "error":
