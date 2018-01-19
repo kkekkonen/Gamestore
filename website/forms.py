@@ -13,8 +13,10 @@ class GameForm(forms.Form):
     error_messages={'required': 'Your game needs a URL!'})
     description = forms.CharField(label = 'Description', required=True,
     error_messages={'required': 'Your game needs a description for some reason!'})
+    price = forms.IntegerField(label = 'Price', required = True,
+    error_messages={'required': 'Your game needs a price!', 'min_value':'your game cannot cost less than 0!'}, min_value = 0)
 
-""" 
+"""
 # WORK IN PROGRESS
 class Verification(models.Model):
     belongs_to = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -46,14 +48,14 @@ class SignupForm(UserCreationForm):
     class Meta:
         model = User
         fields = (
-            'username', 
-            'first_name', 
-            'last_name',  
-            'email', 
-            'password1', 
+            'username',
+            'first_name',
+            'last_name',
+            'email',
+            'password1',
             'password2',
         )
-    
+
 
     def save(self, commit=True):
         user = super(SignupForm, self).save(commit=False)
