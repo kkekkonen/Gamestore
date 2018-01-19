@@ -146,9 +146,9 @@ def save_score(request, game, score):
         old_score = Score.objects.get(game=game, user=request.user)
         if(int(score) > old_score.score):
             old_score.delete()
-            Score.objects.create(game=game, user=request.user, score=request.POST.get("score"))
+            Score.objects.create(game=game, user=request.user, score=score)
     except Score.DoesNotExist:
-        Score.objects.create(game=game, user=request.user, score=request.POST.get("score"))
+        Score.objects.create(game=game, user=request.user, score=score)
     except ValueError:
         return False
     return True
@@ -188,6 +188,8 @@ def save_gameState(request, game):
 
 @login_required
 def game_request(request, game_id):
+    print(request.POST)
+    print(request.GET)
     game = get_object_or_404(Game, pk=game_id)
     if(request.method == "POST"):
         messageType = request.POST.get('messageType')
@@ -202,11 +204,3 @@ def game_request(request, game_id):
             data = load_gameState(request, game)
             return HttpResponse(json.dumps(data), content_type='application/json')
     return HttpResponse(status=204)
-
-@staff_member_required
-@login_required
-def delete_gamestates(request):
-    for gamestate in GameState.objects.all():
-        gamestate.items.all().delete()
-        gamestate.delete()
-    return redirect("home")
