@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.decorators import permission_required
-
+from django.contrib.admin.views.decorators import staff_member_required
 from django.db import models
 from django.contrib.auth.models import Permission
 from django.shortcuts import render, redirect, get_object_or_404
@@ -154,14 +154,14 @@ def save_score(request, game, score):
     return True
 
 @login_required
-def load_gameState(user, game):
+def load_gameState(request, game):
     try:
-        items = GameState.objects.get(game=game, user=user).items.all()
+        items = GameState.objects.get(game=game, user=request.user).items.all()
     except GameState.DoesNotExist:
         data = {"messageType": "ERROR", "info": "Gamestate could not be loaded"}
         return data
     try:
-        score = Score.objects.get(game=game, user=user).score
+        score = Score.objects.get(game=game, user=request.user).score
     except Score.DoesNotExist:
         score = 0
     items_str = list(map(str, items))
@@ -171,9 +171,12 @@ def load_gameState(user, game):
 @login_required
 def save_gameState(request, game):
     try:
-        GameState.objects.filter(user=request.user, game=game).delete()
+        old_gameStates = GameState.objects.filter(user=request.user, game=game)
+        for old_gameState in old_gameStates:
+            old_gameState.items.all().delete()
+            old_gameState.delete()
     except GameState.DoesNotExist:
-        pass
+        print("error")
     items = request.POST.getlist('gameState[playerItems][]')
     score = request.POST.get('gameState[score]')
     save_score(request, game, score)
@@ -196,6 +199,14 @@ def game_request(request, game_id):
     else:
         messageType = request.GET.get("messageType")
         if messageType == "LOAD_REQUEST":
-            data = load_gameState(request.user, game)
+            data = load_gameState(request, game)
             return HttpResponse(json.dumps(data), content_type='application/json')
     return HttpResponse(status=204)
+
+@staff_member_required
+@login_required
+def delete_gamestates(request):
+    for gamestate in GameState.objects.all():
+        gamestate.items.all().delete()
+        gamestate.delete()
+    return redirect("home")
