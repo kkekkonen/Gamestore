@@ -5,6 +5,13 @@
 WEBSTORE GAMEVIEW
 {% endblock %}
 {% block content %}
+
+{% if display %}
+{% block message %}
+    <div class="p-3 mb-2 bg-{{color}} text-white" style='text-align: center'>{{ message }}</div>
+{% endblock message %}
+{% endif %}
+
 {% if owned %}
 	<div id="gameWindow">
 		<div id="gameName">
@@ -24,11 +31,11 @@ WEBSTORE GAMEVIEW
 	    <input type="hidden" name="pid" value={{ pid }} />
 	    <input type="hidden" name="sid" value={{ sid }} />
 	    <input type="hidden" name="success_url"
-	            value={{ success_url }} />
+	            value={{ process_url }} />
 	    <input type="hidden" name="cancel_url"
-	            value="http://localhost:8000/payment/cancel" />
+	            value={{ process_url }} />
 	    <input type="hidden" name="error_url"
-	            value="http://localhost:8000/payment/error" />
+	            value={{ process_url }} />
 	    <input type="hidden" name="checksum"
 	            value={{ checksum }} />
 

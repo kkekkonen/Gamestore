@@ -53,6 +53,8 @@ def signup(request):
         form = UserCreationForm()
     return render(request, 'signup.html', {'form': form})
 
+@permission_required('website.developer_rigths')
+@login_required
 def add_game(request):
     name = request.POST.get('name')
     url = request.POST.get('url')
@@ -81,11 +83,15 @@ def make_checksum(pid, sid, amount, secret_key):
     checksum = m.hexdigest()
     return checksum
 
-def game_view(request, game_id):
+@login_required
+def game_view(request, game_id, display=False, message="", color="primary"):
     game = get_object_or_404(Game, pk=game_id)
     user_games = get_games(request.user)
     context = {}
     context["game"] = game
+    context["display"] = display
+    context["message"] = message
+    context["color"] = color
     if game not in user_games:
         pid = "game" + str(game_id) + request.user.username
         sid = "IHaveSpentTooMuchTimeOnThisIDWSD20172018"
@@ -95,7 +101,7 @@ def game_view(request, game_id):
         context["owned"] = False
         context["pid"] = pid
         context["sid"] = sid
-        context["success_url"] = "http://localhost:8000/games/" + str(game_id) + "/buy"
+        context["process_url"] = "http://localhost:8000/games/" + str(game_id) + "/buy"
         context["checksum"]  = checksum
     else:
         context["owned"] = True
@@ -108,6 +114,7 @@ def get_games(user):
         games.append(purchase.game)
     return games
 
+@login_required
 def game_buy(request, game_id):
     if request.method == "GET":
         pid_test = "game" + str(game_id) + request.user.username
@@ -122,18 +129,17 @@ def game_buy(request, game_id):
             if game not in get_games(request.user):
                 pass
                 Purchase.objects.create(game=game, user=request.user, timestamp=datetime.now())
-            url = "http://localhost:8000/games/" + str(game_id)
-            return redirect(url)
+            return game_view(request, game_id, True, "Purchase successful", "success")
         elif result == "cancel" and checksum == checksum_test and pid == pid_test:
-            #throw cancel page
-            pass
+            return game_view(request, game_id, True, "Purchase canceled", "warning")
         elif result == "error":
-            #throw error page
+            return game_view(request, game_id, True, "Failed to purchase game", "danger")
             pass
         else:
             url = "http://localhost:8000/games/" + str(game_id)
             return redirect(url)
 
+@login_required
 def save_score(request, game, score):
     try:
         score_int = int(score)
@@ -147,6 +153,7 @@ def save_score(request, game, score):
         return False
     return True
 
+@login_required
 def load_gameState(user, game):
     try:
         items = GameState.objects.get(game=game, user=user).items.all()
@@ -161,6 +168,7 @@ def load_gameState(user, game):
     data = {"messageType": "LOAD", "gameState":{"playerItems": items_str, "score": score}}
     return data
 
+@login_required
 def save_gameState(request, game):
     try:
         GameState.objects.filter(user=request.user, game=game).delete()
@@ -175,6 +183,7 @@ def save_gameState(request, game):
         gameState.items.add(item)
     return HttpResponse(status=204)
 
+@login_required
 def game_request(request, game_id):
     game = get_object_or_404(Game, pk=game_id)
     if(request.method == "POST"):
