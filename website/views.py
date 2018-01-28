@@ -138,7 +138,7 @@ def make_checksum(pid, sid, amount, secret_key):
     return checksum
 
 @login_required
-def game_view(request, game_id, display=False, message="", color="primary"):
+def game_view(request, game_id, display=False, message="", color=""):
     game = get_object_or_404(Game, pk=game_id)
     user_games = get_games(request.user)
     context = {}
@@ -244,3 +244,46 @@ def game_request(request, game_id):
             data["messageType"] = "LOAD"
             return HttpResponse(json.dumps(data), content_type='application/json')
     return HttpResponse(status=204)
+
+@login_required
+@permission_required('website.developer_rigths')
+def dev_games(request, display=False, message="", color=""):
+    games = Game.objects.filter(owner=request.user).all()
+    context = {}
+    context["display"] = display
+    context["message"] = message
+    context["color"] = color
+    context["games"] = games
+    return render(request, 'dev_edit.html', context)
+
+def is_int(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
+@login_required
+@permission_required('website.developer_rigths')
+def edit_game(request):
+    print(request.POST)
+    user_id = request.POST.get("user")
+    game_id = request.POST.get("id")
+    user = User.objects.get(id=user_id)
+    game = get_object_or_404(Game, pk=game_id)
+    if(request.user == user and user == game.owner):
+        name = request.POST.get("name")
+        url = request.POST.get("url")
+        description = request.POST.get("description")
+        price = request.POST.get("price")
+        if name:
+            game.name=name
+        if url:
+            game.url=url
+        if description:
+            game.description=description
+        if price and is_int(price):
+            game.price=price
+        game.save()
+        return redirect("dev_games")
+    return dev_games(request, True, "Failed to edit the game", "error")

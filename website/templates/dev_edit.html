@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div id=addGame>
+    <div>
+        <h3>Add Game</h3>
+    </div>
+    <form action="{% url 'add_game' %}" method="POST" id="game-form">
+        {% csrf_token %}
+    <div>
+        <label for="game_name">Game name</label>
+        <div>
+            <input id="game_name" name="name" placeholder="Game name" type="text"/>
+        </div>
+    </div>
+    <div>
+        <label for="game_url">Game url</label>
+        <div>
+            <input id="game_url" name="url" placeholder=" " type="text"/>
+        </div>
+    </div>
+    <div>
+        <label for="game_description">Description</label>
+        <div>
+            <input id="game_description" name="description" placeholder=" " type="text"/>
+        </div>
+    </div>
+    <div>
+        <label for="game_price">Price</label>
+        <div>
+            <input id="game_price" name="price" placeholder=" " type="number"/>
+        </div>
+    </div>
+    <button type="submit">
+    <span></span>
+        Add Game
+    </button>
+    </form>
+</div>
+
+<div>
+    {% for game in games %}
+        <div id="gameEdit{{game.id}}">
+            <div>
+                <h3>Edit {{game.name}}</h3>
+            </div>
+            <form action="{% url 'edit_game' %}" method="POST" id="game-form">
+                {% csrf_token %}
+            <div>
+                <label for="name">Game name</label>
+                <div>
+                    <input id="name" name="name" placeholder="{{game.name}}" type="text"/>
+                </div>
+            </div>
+            <div>
+                <label for="url">Game url</label>
+                <div>
+                    <input id="url" name="url" placeholder="{{game.url}}" type="text"/>
+                </div>
+            </div>
+            <div>
+                <label for="description">Description</label>
+                <div>
+                    <input id="description" name="description" placeholder="{{game.description}}" type="text"/>
+                </div>
+            </div>
+            <div>
+                <label for="price">Price</label>
+                <div>
+                    <input id="price" name="price" placeholder="{{game.price}}" type="number"/>
+                </div>
+            </div>
+            <input type="hidden" name="id" value={{ game.id }} />
+            <input type="hidden" name="user" value={{ request.user.id }} />
+            <button type="submit">
+            <span></span>
+                Edit Game
+            </button>
+            </form>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
