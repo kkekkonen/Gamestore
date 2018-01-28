@@ -1,7 +1,7 @@
 $(document).ready(function () {
 	function getCookie(name) {
 		var cookieValue = null;
-		if (document.cookie && document.cookie != '') {
+		if (document.cookie && document.cookie !== '') {
 			var cookies = document.cookie.split(';');
 			for (var i = 0; i < cookies.length; i++) {
 				var cookie = jQuery.trim(cookies[i]);
@@ -9,8 +9,8 @@ $(document).ready(function () {
 				if (cookie.substring(0, name.length + 1) == (name + '=')) {
 					cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
 					break;
-				};
-			};
+				}
+			}
 		};
 		return cookieValue;
 	};
@@ -28,11 +28,13 @@ $(document).ready(function () {
 	});
 	"use strict";
 	window.addEventListener("message", function(evt) {
-		if(evt.data.messageType === "SCORE" || evt.data.messageType === "SAVE") {
+		if(evt.data.messageType === "SAVE" || evt.data.messageType === "SCORE") {
 			$.ajax({
 				type: "POST",
 				url: window.location.href + "/request",
-				data: evt.data,
+				contentType: 'application/json; charset=utf-8',
+				processData: false,
+				data: JSON.stringify(evt.data),
 				datatype: "json",
 			});
 		} else if(evt.data.messageType === "LOAD_REQUEST") {

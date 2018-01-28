@@ -210,51 +210,37 @@ def save_score(request, game, score):
 @login_required
 def load_gameState(request, game):
     try:
-        items = GameState.objects.get(game=game, user=request.user).items.all()
+        gamestate = GameState.objects.get(game=game, user=request.user).gamestate
     except GameState.DoesNotExist:
-        data = {"messageType": "ERROR", "info": "Gamestate could not be loaded"}
-        return data
-    try:
-        score = Score.objects.get(game=game, user=request.user).score
-    except Score.DoesNotExist:
-        score = 0
-    items_str = list(map(str, items))
-    data = {"messageType": "LOAD", "gameState":{"playerItems": items_str, "score": score}}
-    return data
+        return  {"messageType": "ERROR", "info": "Gamestate could not be loaded, you don't have any saves for this game!"}
+    return json.loads(gamestate)
 
 @login_required
-def save_gameState(request, game):
+def save_gameState(request, game, json_string):
     try:
-        old_gameStates = GameState.objects.filter(user=request.user, game=game)
-        for old_gameState in old_gameStates:
-            old_gameState.items.all().delete()
-            old_gameState.delete()
+        old_gameState = GameState.objects.filter(user=request.user, game=game)
+        old_gameState.delete()
     except GameState.DoesNotExist:
-        print("error")
-    items = request.POST.getlist('gameState[playerItems][]')
-    score = request.POST.get('gameState[score]')
-    save_score(request, game, score)
-    gameState = GameState.objects.create(game=game, user=request.user)
-    for item in items:
-        item = Item.objects.create(name=item)
-        gameState.items.add(item)
+        pass
+    GameState.objects.create(game=game, user=request.user, gamestate=json_string)
     return HttpResponse(status=204)
+
 
 @login_required
 def game_request(request, game_id):
-    print(request.POST)
-    print(request.GET)
+    json_string = request.read().decode('utf-8')
     game = get_object_or_404(Game, pk=game_id)
     if(request.method == "POST"):
-        messageType = request.POST.get('messageType')
+        messageType = json.loads(json_string).get('messageType')
         if messageType == "SAVE":
-            save_gameState(request, game)
+            save_gameState(request, game, json_string)
         elif messageType == "SCORE":
-            save_score(request, game, request.POST.get("score"))
+            save_score(request, game, json.loads(json_string).get("score"))
             return HttpResponse(status=204)
     else:
         messageType = request.GET.get("messageType")
         if messageType == "LOAD_REQUEST":
             data = load_gameState(request, game)
+            data["messageType"] = "LOAD"
             return HttpResponse(json.dumps(data), content_type='application/json')
     return HttpResponse(status=204)
