@@ -21,4 +21,5 @@ urlpatterns = [
     #url(r'^admin/', admin.site.urls),
     path('admin/', admin.site.urls),
     path('', include('website.urls')),
+    path('', include('rest.urls')),
 ]
