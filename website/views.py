@@ -10,10 +10,13 @@ from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate as auth_authenticate
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
+from django.core.validators import URLValidator
+from django.core.exceptions import ValidationError
 from website.models import *
 from website.forms import *
 from hashlib import md5
 import json
+import time
 from datetime import datetime
 
 def is_developer(user):
@@ -126,10 +129,9 @@ def add_game(request):
         }
         game = Game(**game_data)
         game.save()
-        return redirect('home')
+        return redirect('dev_games')
     else:
-        print(form.errors)
-        return HttpResponse(status=204)
+        return dev_games(request, True, "failed to add game", "danger")
 
 def make_checksum(pid, sid, amount, secret_key):
     checksumstr = "pid={}&sid={}&amount={}&token={}".format(pid, sid, amount, secret_key)
@@ -144,7 +146,7 @@ def game_view(request, game_id, display=False, message="", color=""):
     context = {}
     context["game"] = game
     context["display"] = display
-    context["purchase_message"] = message
+    context["result_message"] = message
     context["color"] = color
     if game not in user_games:
         pid = "game" + str(game_id) + request.user.username
@@ -162,6 +164,7 @@ def game_view(request, game_id, display=False, message="", color=""):
     return render(request, 'game.html', context)
 
 def get_games(user):
+    #function is used to collect a users owned games
     purchases = Purchase.objects.filter(user = user)
     games = []
     for purchase in purchases:
@@ -170,6 +173,8 @@ def get_games(user):
 
 @login_required
 def game_buy(request, game_id):
+    #this function is used to process a purchase request. a purchase is successfull only if the
+    #checksum is correct and result is "success". If purchase fails for any reason a error is displayed
     if request.method == "GET":
         pid_test = "game" + str(game_id) + request.user.username
         pid = request.GET.get("pid", "")
@@ -181,20 +186,19 @@ def game_buy(request, game_id):
         if result == "success" and checksum == checksum_test and pid == pid_test:
             game = Game.objects.get(pk=game_id)
             if game not in get_games(request.user):
-                pass
                 Purchase.objects.create(game=game, user=request.user, timestamp=datetime.now())
             return game_view(request, game_id, True, "Purchase successful", "success")
         elif result == "cancel" and checksum == checksum_test and pid == pid_test:
             return game_view(request, game_id, True, "Purchase canceled", "warning")
         elif result == "error":
             return game_view(request, game_id, True, "Failed to purchase game", "danger")
-            pass
         else:
-            url = "http://localhost:8000/games/" + str(game_id)
-            return redirect(url)
+            return game_view(request, game_id, True, "parameter missing or invalid", "danger")
 
 @login_required
 def save_score(request, game, score):
+    #this function is used to save a score. Used in function game_request below
+    #a score is only saved if it is better than the users old score in the same game.
     try:
         score_int = int(score)
         old_score = Score.objects.get(game=game, user=request.user)
@@ -203,12 +207,10 @@ def save_score(request, game, score):
             Score.objects.create(game=game, user=request.user, score=score)
     except Score.DoesNotExist:
         Score.objects.create(game=game, user=request.user, score=score)
-    except ValueError:
-        return False
-    return True
 
 @login_required
 def load_gameState(request, game):
+    #this function tries to load the gamestate the user has previously saved. Used in function game_request below
     try:
         gamestate = GameState.objects.get(game=game, user=request.user).gamestate
     except GameState.DoesNotExist:
@@ -217,6 +219,8 @@ def load_gameState(request, game):
 
 @login_required
 def save_gameState(request, game, json_string):
+    #this function saves the game when the users request's messagetype is "SAVE". Used in function game_request below
+    #the service deletes old saves and saves the json the user has sent in the Purchase-model.
     try:
         old_gameState = GameState.objects.filter(user=request.user, game=game)
         old_gameState.delete()
@@ -228,9 +232,10 @@ def save_gameState(request, game, json_string):
 
 @login_required
 def game_request(request, game_id):
-    json_string = request.read().decode('utf-8')
+    #function processes all the request made by the game/user to the service such as save/loads
     game = get_object_or_404(Game, pk=game_id)
     if(request.method == "POST"):
+        json_string = request.read().decode('utf-8')
         messageType = json.loads(json_string).get('messageType')
         if messageType == "SAVE":
             save_gameState(request, game, json_string)
@@ -248,10 +253,11 @@ def game_request(request, game_id):
 @login_required
 @permission_required('website.developer_rigths')
 def dev_games(request, display=False, message="", color=""):
+    #function collects the games the user-developer has made to populate the dev_edit templates edit-forms
     games = Game.objects.filter(owner=request.user).all()
     context = {}
     context["display"] = display
-    context["message"] = message
+    context["result_message"] = message
     context["color"] = color
     context["games"] = games
     return render(request, 'dev_edit.html', context)
@@ -266,12 +272,15 @@ def is_int(s):
 @login_required
 @permission_required('website.developer_rigths')
 def edit_game(request):
-    print(request.POST)
-    user_id = request.POST.get("user")
+    #function is used by developers to edit pre-existing games in "dev_edit" template
     game_id = request.POST.get("id")
     user = User.objects.get(id=user_id)
     game = get_object_or_404(Game, pk=game_id)
-    if(request.user == user and user == game.owner):
+    #check that the user owns the game he is about to edit
+    if(request.user == game.owner):
+        validate = URLValidator()
+        display = False
+        message = ""
         name = request.POST.get("name")
         url = request.POST.get("url")
         description = request.POST.get("description")
@@ -279,11 +288,26 @@ def edit_game(request):
         if name:
             game.name=name
         if url:
-            game.url=url
+            try:
+                validate(url)
+                game.url=url
+            except ValidationError:
+                display =True
+                message += "Url is invalid"
         if description:
             game.description=description
         if price and is_int(price):
             game.price=price
         game.save()
-        return redirect("dev_games")
-    return dev_games(request, True, "Failed to edit the game", "error")
+        return dev_games(request, display, message, "warning")
+    return dev_games(request, True, "Failed to edit the game", "danger")
+
+@login_required
+@permission_required('website.developer_rigths')
+def game_stats(request):
+    #this function is used to create the data required in a selling statistic-graph
+    your_games = Game.objects.filter(owner=request.user).all()
+    result = {}
+    for game in your_games:
+        result[game.id] = (list(map(lambda x: time.mktime(x.timestamp.timetuple()), Purchase.objects.filter(game=game).all())))
+    print(result)
