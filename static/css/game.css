@@ -1,0 +1,19 @@
+.game {
+    top:50%;
+    left:50%;
+    position:absolute;
+    margin-right:-50%;
+    transform: translate(-50%, -50%);
+}
+
+.game .form-control {
+    position: relative;
+    box-sizing: border-box;
+    height: auto;
+    padding: 10px;
+    font-size: 16px;
+}
+
+.game-heading{
+    margin-bottom: 10px;
+}
