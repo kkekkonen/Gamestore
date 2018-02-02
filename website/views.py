@@ -18,6 +18,7 @@ from hashlib import md5
 import json
 import time
 from datetime import datetime
+from collections import defaultdict
 
 def is_developer(user):
     return user.has_perm('website.developer_rights')
@@ -301,13 +302,32 @@ def edit_game(request):
         game.save()
         return dev_games(request, display, message, "warning")
     return dev_games(request, True, "Failed to edit the game", "danger")
-
+'''
 @login_required
 @permission_required('website.developer_rigths')
-def game_stats(request):
+def game_stats(request, game_id):
     #this function is used to create the data required in a selling statistic-graph
     your_games = Game.objects.filter(owner=request.user).all()
     result = {}
     for game in your_games:
-        result[game.id] = (list(map(lambda x: time.mktime(x.timestamp.timetuple()), Purchase.objects.filter(game=game).all())))
+        #time.mktime(x.timestamp.timetuple())
+        result[game.id] = (list(map(lambda x: x.timestamp, Purchase.objects.filter(game=game).all())))
     print(result)
+'''
+
+@login_required
+@permission_required('website.developer_rigths')
+def game_stats(request, game_id):
+    #this function is used to create a json used to display selling data of a game
+    game = Game.objects.get(pk=game_id)
+    if(game.owner == request.user):
+        purchases = (list(map(lambda x: x.timestamp, Purchase.objects.filter(game=game).all())))
+        purchases.sort()
+        dates = defaultdict(lambda:defaultdict(int))
+        for purchase in purchases:
+            year = purchase.year
+            month = purchase.month
+            dates[year][month] += 1
+        return HttpResponse(json.dumps(dates), content_type='application/json')
+    else:
+        return HttpResponse(status=403)

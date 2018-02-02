@@ -34,5 +34,5 @@ urlpatterns = [
     path('games/<int:game_id>/buy', views.game_buy, name='game_buy'),
     path('account/developer', views.dev_games, name='dev_games'),
     path('account/edit_game', views.edit_game, name='edit_game'),
-    path('account/game_stats', views.game_stats, name='game_stats'),
+    path('account/game_stats/<int:game_id>', views.game_stats, name='game_stats'),
 ]

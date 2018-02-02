@@ -48,7 +48,9 @@ $(document).ready(function () {
 				},
 			});
 		} else if( evt.data.messageType === "SETTING") {
-			$("#iFrameWindow").width(evt.data.options.width).height(evt.data.options.height);
+			var height = Math.min($(window).height()*0.9, evt.data.options.height);
+			var width = Math.min($(window).width()*0.9, evt.data.options.width);
+			$("#iFrameWindow").width(width).height(height);
 		};
 	});
 });
