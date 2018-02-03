@@ -149,7 +149,10 @@ def game_view(request, game_id, display=False, message="", color=""):
     context["display"] = display
     context["result_message"] = message
     context["color"] = color
-    if game not in user_games:
+    context["creator"] = False
+    if request.user == game.owner:
+        context["creator"] = True
+    if game not in user_games and game.owner != request.user:
         pid = "game" + str(game_id) + request.user.username
         sid = "IHaveSpentTooMuchTimeOnThisIDWSD20172018"
         secret_key = "aa3dfa29c26efc70b4795f4cfb078f20"
@@ -324,6 +327,12 @@ def game_stats(request, game_id):
         purchases = (list(map(lambda x: x.timestamp, Purchase.objects.filter(game=game).all())))
         purchases.sort()
         dates = defaultdict(lambda:defaultdict(int))
+        now = datetime.now()
+        for i in range(1, 13):
+            if( i > now.month):
+                dates[now.year-1][i] = 0
+            if i <= now.month :
+                dates[now.year][i] = 0
         for purchase in purchases:
             year = purchase.year
             month = purchase.month

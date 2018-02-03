@@ -8,15 +8,24 @@
 {% block content %}
 {% load static %}
 <script src="{% static 'js/game_messaging.js' %}"></script>
+{% if creator %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script src="{% static 'js/statistics.js' %}"></script>
+{% endif %}
 
 
 {% if owned %}
-	<div id="gameWindow" class="game">
-		<h2>{{game.name}}</h2>
-		<iframe id="iFrameWindow" src="{{game.url}}"></iframe>
-  </div>
+	<div id="gameWindow">
+		<h2 class="text-center" >{{game.name}}</h2>
+		<iframe id="iFrameWindow" class="game-window" src="{{game.url}}"></iframe>
+    </div>
+    {% if perms.website.developer_rigths %}
+    <div class="game-statistics">
+        <canvas id="statisticsChart"></canvas>
+    </div>
+    {% endif %}
 {% else %}
-	<div class="game" style="top:50%;left:50%;position:absolute;margin-right:-50%;transform: translate(-50%, -50%);">
+	<div class="game-form game">
 		<h2 class="game-heading">You must buy the game first</h2>
 		<h4 style="text-align: center">{{game.name}}</h4>
 		<form action="http://payments.webcourse.niksula.hut.fi/pay/" method="POST">
