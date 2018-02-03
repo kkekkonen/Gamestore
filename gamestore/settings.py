@@ -27,6 +27,7 @@ SECRET_KEY = '78ewi@&h)rb4ri1@!7@a#or_!#wl$921@^z7@7%6ela(1_-h=f'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+LOGIN_URL = 'user_login'
 LOGIN_REDIRECT_URL = 'home'
 
 ALLOWED_HOSTS = ['*']
@@ -128,3 +129,12 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join('static'), )
 
 SESSION_COOKIE_AGE = 600
+
+# Only when running in Heroku
+if "DYNO" in os.environ:
+    STATIC_ROOT = 'staticfiles'
+    import dj_database_url
+    DATABASES['default'] =  dj_database_url.config()
+
+    DEBUG = True # False, once service is succesfully deployed
+    ALLOWED_HOSTS = ['*']

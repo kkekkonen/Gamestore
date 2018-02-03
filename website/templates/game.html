@@ -1,29 +1,33 @@
 {% extends "base.html" %}
 
-{# TITLE HERE #}
-{% block title %}
-WEBSTORE GAMEVIEW
-{% endblock %}
+{% block static-files %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/game.css' %}">
+{% endblock static-files %}
+
 {% block content %}
 {% load static %}
 <script src="{% static 'js/game_messaging.js' %}"></script>
+{% if creator %}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+    <script src="{% static 'js/statistics.js' %}"></script>
+{% endif %}
 
 
 {% if owned %}
 	<div id="gameWindow">
-		<div id="gameName">
-			{{game.name}}
-		</div>
-			<iframe id="iFrameWindow" src="{{game.url}}"></iframe>
-		<div id="gameDescription">
-			{{game.description}}
-		</div>
-  </div>
+		<h2 class="text-center" >{{game.name}}</h2>
+		<iframe id="iFrameWindow" class="game-window" src="{{game.url}}"></iframe>
+    </div>
+    {% if perms.website.developer_rigths %}
+    <div class="game-statistics">
+        <canvas id="statisticsChart"></canvas>
+    </div>
+    {% endif %}
 {% else %}
-	<div id="purchaseWindow" style="top:50%;left:50%;position:absolute;margin-right:-50%;transform: translate(-50%, -50%);">
-		<h4 style="text-align: center">You must buy the game first</h4>
-		<div style="text-align: center">{{game.name}}</div>
-		<div style="text-align: center">{{game.description}}</div>
+	<div class="game-form game">
+		<h2 class="game-heading">You must buy the game first</h2>
+		<h4 style="text-align: center">{{game.name}}</h4>
 		<form action="http://payments.webcourse.niksula.hut.fi/pay/" method="POST">
 	    <input type="hidden" name="pid" value={{ pid }} />
 	    <input type="hidden" name="sid" value={{ sid }} />
@@ -35,10 +39,11 @@ WEBSTORE GAMEVIEW
 	            value={{ process_url }} />
 	    <input type="hidden" name="checksum"
 	            value={{ checksum }} />
-
-	    <label for="id_amount">Price</label>
-	    <input type="text" id="id_amount" name="amount" value={{ amount }} />
-	    <input type="submit" value="Accept Payment"/>
+		<div class="form-group">
+		    <label for="id_amount">Price</label>
+		    <input type="text" id="id_amount" name="amount" value={{ amount }} class="form-control" />
+		</div>
+	    <button class="btn btn-lg btn-primary btn-block" type="submit">Accept payment</button>
 		</form>
 	</div>
 {% endif %}
