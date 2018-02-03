@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime
+from django.utils import timezone
 
 class RightsSupport(models.Model):
 
@@ -27,7 +28,7 @@ class Game(models.Model):
 class Purchase(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    timestamp = models.DateTimeField(editable=False)
+    timestamp = models.DateTimeField(editable=False, default=timezone.now)
 
 class Score(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
