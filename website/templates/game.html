@@ -32,11 +32,11 @@
 	    <input type="hidden" name="pid" value={{ pid }} />
 	    <input type="hidden" name="sid" value={{ sid }} />
 	    <input type="hidden" name="success_url"
-	            value={{ process_url }} />
+	            value={{ request.build_absolute_uri }}/buy />
 	    <input type="hidden" name="cancel_url"
-	            value={{ process_url }} />
+	            value={{ request.build_absolute_uri }}/buy />
 	    <input type="hidden" name="error_url"
-	            value={{ process_url }} />
+	            value={{ request.build_absolute_uri }}/buy />
 	    <input type="hidden" name="checksum"
 	            value={{ checksum }} />
 		<div class="form-group">
