@@ -278,7 +278,6 @@ def is_int(s):
 def edit_game(request):
     #function is used by developers to edit pre-existing games in "dev_edit" template
     game_id = request.POST.get("id")
-    user = User.objects.get(id=user_id)
     game = get_object_or_404(Game, pk=game_id)
     #check that the user owns the game he is about to edit
     if(request.user == game.owner):
