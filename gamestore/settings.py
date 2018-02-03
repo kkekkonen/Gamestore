@@ -128,3 +128,12 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join('static'), )
 
 SESSION_COOKIE_AGE = 600
+
+# Only when running in Heroku
+if "DYNO" in os.environ:
+    STATIC_ROOT = 'staticfiles'
+    import dj_database_url
+    DATABASES['default'] =  dj_database_url.config()
+
+    DEBUG = True # False, once service is succesfully deployed
+    ALLOWED_HOSTS = ['*']
