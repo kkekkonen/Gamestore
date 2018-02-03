@@ -161,7 +161,6 @@ def game_view(request, game_id, display=False, message="", color=""):
         context["owned"] = False
         context["pid"] = pid
         context["sid"] = sid
-        context["process_url"] = "http://localhost:8000/games/" + str(game_id) + "/buy"
         context["checksum"]  = checksum
     else:
         context["owned"] = True
