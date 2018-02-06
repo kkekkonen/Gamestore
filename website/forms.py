@@ -41,9 +41,9 @@ class Verification(models.Model):
 """
 
 class SignupForm(UserCreationForm):
-    email = forms.EmailField(label='Email', required=True)
-    first_name = forms.CharField(label='First name', max_length=30, required=True)
-    last_name = forms.CharField(label='Last name', max_length=50, required=True)
+    email = forms.EmailField(widget=forms.TextInput(attrs={'class':'form-control'}), label='Email', required=True)
+    first_name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}), label='First name', max_length=30, required=True)
+    last_name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}), label='Last name', max_length=50, required=True)
 
     class Meta:
         model = User
@@ -56,6 +56,10 @@ class SignupForm(UserCreationForm):
             'password2',
         )
 
+    def __init__(self, *args, **kwargs):
+        super(SignupForm, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
 
     def save(self, commit=True):
         user = super(SignupForm, self).save(commit=False)

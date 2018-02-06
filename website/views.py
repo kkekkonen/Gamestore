@@ -52,7 +52,7 @@ def user_login(request):
             }
             return render(request, 'registration/auth_error.html', context)
 
-#@permission_required('website.developer_rigths')
+#@permission_required('website.developer_rights')
 @login_required
 def settings(request):
     context = {
@@ -81,26 +81,23 @@ def settings(request):
             context['mesage_type'] = 'bg-danger'
             return render(request, 'account/settings.html', context)
 
-
 def signup(request):
-    error_context = {
-        'message_type': 'bg-danger',
-        'message': 'Invalid form! Please try again.'
-    }
     if request.method == 'POST':
-        print(request.POST)
         form = SignupForm(request.POST)
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
-            user = auth_authenticate(request, username=username, password=raw_password)
+            user = auth_authenticate(username=username, password=raw_password)
             auth_login(request, user)
-            return redirect(reverse('home'))
+            if(request.POST.get('developer') == 'on'):
+                give_dev_rights(user)
+            return redirect('home')
         else:
-            return render(request, 'registration/signup.html', error_context)
-    elif request.method == 'GET':
-        return render(request, 'registration/signup.html')
+            return render(request, 'registration/signup.html', {'form': form})
+    else:
+        form = SignupForm()
+        return render(request, 'registration/signup.html', {'form': form})
 
 def home(request):
     return render(request, 'home.html')
@@ -108,7 +105,7 @@ def home(request):
 def verify_email(request):
     pass
 
-@permission_required('website.developer_rigths')
+@permission_required('website.developer_rights')
 @login_required
 def add_game(request):
     if(request.method == "POST"):
@@ -128,7 +125,7 @@ def add_game(request):
             }
             game = Game(**game_data)
             game.save()
-            return redirect('dev_games')
+            return redirect('my_games')
         else:
             context = {}
             context["form"] = form
@@ -166,6 +163,7 @@ def game_view(request, game_id, display=False, message="", color=""):
         context["sid"] = sid
         context["checksum"]  = checksum
     else:
+        context["scores"] = Score.objects.filter(game=game).order_by('-score')[:5]
         context["owned"] = True
     return render(request, 'game.html', context)
 
@@ -266,7 +264,7 @@ def is_int(s):
         return False
 
 @login_required
-@permission_required('website.developer_rigths')
+@permission_required('website.developer_rights')
 def edit_game(request, game_id):
     #function is used by developers to edit pre-existing games in "game_form" template
     game = get_object_or_404(Game, pk=game_id)
@@ -311,6 +309,19 @@ def game_stats(request, game_id):
         return HttpResponse(json.dumps(dates), content_type='application/json')
     else:
         return HttpResponse(status=403)
+
+@login_required
 def my_games(request):
     context = {"games": get_games(request.user)}
     return render(request, 'my_games.html', context)
+
+@login_required
+@permission_required('website.developer_rights')
+def delete_game(request, game_id):
+    #function to delete a game which belongs to the user
+    game = get_object_or_404(Game, pk=game_id)
+    if(request.user == game.owner):
+        game.delete()
+        return redirect("my_games")
+    else:
+        return HttpResponse(status=403)

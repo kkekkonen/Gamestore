@@ -16,38 +16,48 @@
 <div class="col-lg-12 well">
     <form class="form-signin form-signup" method="POST">
         {% csrf_token %}
-        
+
         <div class="col-sm-12">
             <h2 class="form-signin-heading">Create an account</h2>
             <div class="form-group">
-                <label>Username</label>
-                <input name="username" type="text" placeholder="Desired username..." class="form-control" required autofocus>
+                {{ form.username.label_tag }}
+                 {{ form.username }}
+                 {{ form.username.errors }}
             </div>
             <div class="row">
                 <div class="col-sm-6 form-group">
-                    <label>First Name</label>
-                    <input name="first_name" type="text" placeholder="First name..." class="form-control" required>
+                    {{ form.first_name.label_tag }}
+                     {{ form.first_name }}
+                     {{ form.first_name.errors }}
                 </div>
                 <div class="col-sm-6 form-group">
-                    <label>Last Name</label>
-                    <input name="last_name" type="text" placeholder="Last name" class="form-control" required>
+                    {{ form.last_name.label_tag }}
+                     {{ form.last_name }}
+                     {{ form.last_name.errors }}
                 </div>
-            </div>	
+            </div>
             <div class="form-group">
-                <label>Email Address</label>
-                <input name="email" type="text" placeholder="Email" class="form-control" required>
+                {{ form.email.label_tag }}
+                 {{ form.email }}
+                 {{ form.email.errors }}
             </div>
             <div class="row">
                 <div class="col-sm-6 form-group">
-                    <label>Password</label>
-                    <input name="password1" type="password" placeholder='Password' class="form-control" required>
+                    {{ form.password1.label_tag }}
+                     {{ form.password1 }}
+                     {{ form.password1.errors }}
                 </div>
                 <div class="col-sm-6 form-group">
-                    <label>Enter password again</label>
-                    <input name="password2" type="password" placeholder="Confirm password" class="form-control" required>
+                    {{ form.password2.label_tag }}
+                     {{ form.password2 }}
+                     {{ form.password2.errors }}
+                </div>
+                <div class="col-sm-6 form-group">
+                    <label>Developer checkbox</label>
+                    <input name="developer" type="checkbox" class="form-control">
                 </div>
             </div>
-            <button type="submit" class="btn btn-lg btn-info">Submit</button>					
+            <button type="submit" class="btn btn-lg btn-info">Submit</button>
         </div>
     </form>
 </div>

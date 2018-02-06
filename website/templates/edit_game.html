@@ -8,7 +8,7 @@
 
 {% block content %}
     <div class="col-lg-12 well">
-        <div id="gameEdit{{game.id}}" class="col-sm-12">
+        <div class="col-sm-12">
             <form action="{{ request.build_absolute_uri }}" method="POST" id="game-form" class="form-game form-signup">
                 {% csrf_token %}
                 <h2 class="form-game-heading">Edit {{game.name}}</h2>
@@ -24,7 +24,6 @@
                     {% endfor %}
                 </div>
                 <button type="submit" class="btn btn-lg btn-info">
-                <span></span>
                     Edit Game
                 </button>
             </form>
