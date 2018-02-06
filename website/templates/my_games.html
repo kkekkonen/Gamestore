@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+    {% for game in games %}
+        <div>
+            {{game.name}}
+            {% if game.owner == request.user %}
+            <a href="{% url 'edit_game' game.id %}">edit game</a>
+            {% endif %}
+            <a href="{% url 'game_view' game.id %}">view game</a>
+        </div>
+    {% endfor %}
+{% endblock %}

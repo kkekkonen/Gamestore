@@ -105,34 +105,37 @@ def signup(request):
 def home(request):
     return render(request, 'home.html')
 
-def my_games(request):
-    pass
-
 def verify_email(request):
     pass
 
 @permission_required('website.developer_rigths')
 @login_required
 def add_game(request):
-    name = request.POST.get('name')
-    url = request.POST.get('url')
-    description = request.POST.get('description')
-    price = request.POST.get('price')
-    data = {"name":name, "url":url, "description":description, "price":price}
-    form = GameForm(data)
-    if form.is_valid():
-        game_data = {
-            'name': form.cleaned_data['name'],
-            'url': form.cleaned_data['url'],
-            'description': form.cleaned_data['description'],
-            'price':form.cleaned_data['price'],
-            'owner':request.user,
-        }
-        game = Game(**game_data)
-        game.save()
-        return redirect('dev_games')
+    if(request.method == "POST"):
+        name = request.POST.get('name')
+        url = request.POST.get('url')
+        description = request.POST.get('description')
+        price = request.POST.get('price')
+        data = {"name":name, "url":url, "description":description, "price":price}
+        form = GameForm(data)
+        if form.is_valid():
+            game_data = {
+                'name': form.cleaned_data['name'],
+                'url': form.cleaned_data['url'],
+                'description': form.cleaned_data['description'],
+                'price':form.cleaned_data['price'],
+                'owner':request.user,
+            }
+            game = Game(**game_data)
+            game.save()
+            return redirect('dev_games')
+        else:
+            context = {}
+            context["form"] = form
+            return render(request, 'add_game.html', context)
     else:
-        return dev_games(request, True, "failed to add game", "danger")
+        return render(request, 'add_game.html', {"form": GameForm()})
+
 
 def make_checksum(pid, sid, amount, secret_key):
     checksumstr = "pid={}&sid={}&amount={}&token={}".format(pid, sid, amount, secret_key)
@@ -172,7 +175,8 @@ def get_games(user):
     games = []
     for purchase in purchases:
         games.append(purchase.game)
-    return games
+    created_games = Game.objects.filter(owner = user).all()
+    return list(created_games) + games
 
 @login_required
 def game_buy(request, game_id):
@@ -253,17 +257,6 @@ def game_request(request, game_id):
             return HttpResponse(json.dumps(data), content_type='application/json')
     return HttpResponse(status=204)
 
-@login_required
-@permission_required('website.developer_rigths')
-def dev_games(request, display=False, message="", color=""):
-    #function collects the games the user-developer has made to populate the dev_edit templates edit-forms
-    games = Game.objects.filter(owner=request.user).all()
-    context = {}
-    context["display"] = display
-    context["result_message"] = message
-    context["color"] = color
-    context["games"] = games
-    return render(request, 'dev_edit.html', context)
 
 def is_int(s):
     try:
@@ -274,53 +267,33 @@ def is_int(s):
 
 @login_required
 @permission_required('website.developer_rigths')
-def edit_game(request):
-    #function is used by developers to edit pre-existing games in "dev_edit" template
-    game_id = request.POST.get("id")
+def edit_game(request, game_id):
+    #function is used by developers to edit pre-existing games in "game_form" template
     game = get_object_or_404(Game, pk=game_id)
     #check that the user owns the game he is about to edit
     if(request.user == game.owner):
-        validate = URLValidator()
-        display = False
-        message = ""
-        name = request.POST.get("name")
-        url = request.POST.get("url")
-        description = request.POST.get("description")
-        price = request.POST.get("price")
-        if name:
-            game.name=name
-        if url:
-            try:
-                validate(url)
-                game.url=url
-            except ValidationError:
-                display =True
-                message += "Url is invalid"
-        if description:
-            game.description=description
-        if price and is_int(price):
-            game.price=price
-        game.save()
-        return dev_games(request, display, message, "warning")
-    return dev_games(request, True, "Failed to edit the game", "danger")
-'''
-@login_required
-@permission_required('website.developer_rigths')
-def game_stats(request, game_id):
-    #this function is used to create the data required in a selling statistic-graph
-    your_games = Game.objects.filter(owner=request.user).all()
-    result = {}
-    for game in your_games:
-        #time.mktime(x.timestamp.timetuple())
-        result[game.id] = (list(map(lambda x: x.timestamp, Purchase.objects.filter(game=game).all())))
-    print(result)
-'''
+        if(request.method == "POST"):
+            #game_id = request.POST.get("id")
+            name = request.POST.get("name")
+            url = request.POST.get("url")
+            description = request.POST.get("description")
+            price = request.POST.get("price")
+            data = {"name":name, "url":url, "description":description, "price":price}
+            form = GameForm(data)
+            if form.is_valid():
+                game.__dict__.update(**data)
+            return render(request, 'edit_game.html', {"form": form, "game": game} )
+        else:
+            data = {"name":game.name, "url":game.url, "description":game.description, "price":game.price}
+            form = GameForm(initial=data)
+            return render(request, 'edit_game.html', {"form": form, "game": game} )
+    return Http404
 
 @login_required
 @permission_required('website.developer_rigths')
 def game_stats(request, game_id):
     #this function is used to create a json used to display selling data of a game
-    game = Game.objects.get(pk=game_id)
+    game = get_object_or_404(Game, pk=game_id)
     if(game.owner == request.user):
         purchases = (list(map(lambda x: x.timestamp, Purchase.objects.filter(game=game).all())))
         purchases.sort()
@@ -338,3 +311,6 @@ def game_stats(request, game_id):
         return HttpResponse(json.dumps(dates), content_type='application/json')
     else:
         return HttpResponse(status=403)
+def my_games(request):
+    context = {"games": get_games(request.user)}
+    return render(request, 'my_games.html', context)

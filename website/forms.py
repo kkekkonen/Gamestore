@@ -7,14 +7,14 @@ from django.core import mail
 from django.urls import reverse
 
 class GameForm(forms.Form):
-    name = forms.CharField(label = 'Game Name', max_length=255, required=True,
+    name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}), label = 'Game Name', max_length=255, required=True,
     error_messages={'required': 'Your game needs a name!'})
-    url = forms.URLField(label = 'Url', max_length=255, required=True,
+    url = forms.URLField(widget=forms.TextInput(attrs={'class':'form-control'}), label = 'Url', max_length=255, required=True,
     error_messages={'required': 'Your game needs a URL!'})
-    description = forms.CharField(label = 'Description', required=True,
+    description = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}), label = 'Description', required=True,
     error_messages={'required': 'Your game needs a description for some reason!'})
-    price = forms.IntegerField(label = 'Price', required = True,
-    error_messages={'required': 'Your game needs a price!', 'min_value':'your game cannot cost less than 0!'}, min_value = 0)
+    price = forms.FloatField(widget=forms.TextInput(attrs={'class':'form-control'}), label = 'Price', required = True,
+    error_messages={'required': 'Your game needs a price!', 'min_value':'your game cannot cost less than 0!', 'max_value': 'your game cannot cost more than 10000!'}, min_value = 0.0, max_value = 10000.0)
 
 """
 # WORK IN PROGRESS
