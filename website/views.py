@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import permission_required
 from django.urls import reverse
 
 from django.db import models
+from django.db.models import Q #ei vissii importtaa tol ylemmäl... -ei, enkä tiedä miks
 from django.contrib.auth.models import Permission
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -12,6 +13,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from website.models import *
 from website.forms import *
 from hashlib import md5
@@ -252,6 +254,39 @@ def game_request(request, game_id):
             data["messageType"] = "LOAD"
             return HttpResponse(json.dumps(data), content_type='application/json')
     return HttpResponse(status=204)
+
+def search(request):
+    searchgame_list = Game.objects.all()
+    searchtext = request.GET.get("q")
+
+    paginator = Paginator(searchgame_list, 3)
+    page = request.GET.get('page')
+    try:
+        searchgames = paginator.page(page)
+    except PageNotAnInteger:
+        searchgames = paginator.page(1)
+    except EmptyPage:
+        searchgames = paginator.page(paginator.num_pages)
+
+    if searchtext:
+        searchgame_list = searchgame_list.filter(
+            Q(name__icontains = searchtext)
+            )
+
+    context = {
+        "games_list": searchgame_list,
+        "page": page,
+    }
+    
+    if request.user.is_authenticated:
+        user_games = get_games(request.user)
+        context["user_games"] = user_games
+
+    return render(request, 'search.html', context)
+
+def categories(request):
+    #työnalla...
+    return render(request, 'categories.html')
 
 @login_required
 @permission_required('website.developer_rigths')
