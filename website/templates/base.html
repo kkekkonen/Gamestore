@@ -52,7 +52,7 @@
                         {% for category in category_list %}
                             <a class="dropdown-item" href="{% url 'categories_page' %}?cat={{ category }}">{{ category }}</a>
                         {% endfor %}
-                        <a class="dropdown-item" href="{% url 'categories_page' %}?cat=All">All</a>
+                        <a class="dropdown-item" href="{% url 'categories_page' %}">All</a>
                     </div>
                     </li>
                     <!--Account-->

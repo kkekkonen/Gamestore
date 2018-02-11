@@ -1,9 +1,77 @@
 {% extends "base.html" %}
 
 {% block content %}
+<!--left category nav-->
+<div class="navbar navbar-inverse navbar-fixed-left">
+	<ul class="nav navbar-nav">
+		{% for category in categorys_list %}
+			<li class="nav-item">
+				<a href="{% url 'categories_page' %}?cat={{ category.name }}">{{ category.name }}</a>
+			</li>
+		{% endfor %}
+		<li>
+			<a href="{% url 'categories_page' %}">All</a>
+		</li>
+	</ul>
+</div>
+<div class="container">
+	<!-- if request.GET.cat in category -->
+	{% if request.GET.cat|length > 0 %}
+		<h1>Browsing {{ request.GET.cat }}</h1>
+	{% else %}
+		<h1>Browsing All</h1>
+	{% endif %}
+	<!--Result content-->
+	<H2>Results:</H2>
+	<table class="table">
+	    <thead class="thead-inverse">
+	        <th>Game</th>
+	        <th>Description</th>
+	        <th>Price</th>
+	    </thead>
+		{% if request.GET.cat in category_list %}
+			{% for game in games_list %}
+		        <div class="searchresult">
+		            <tr {% if request.user.is_authenticated %} style="cursor: pointer;" onclick="window.location.href='{{ game.url }}' {% endif %};">
+		                <th>
+		                    {{ game.name }}
+		                </th>
+		                <th>
+		                    {{ game.description|truncatechars:100 }}
+		                </th>
+		                <th>
+		                    <!--Price or owned-->
+		                    {% if request.user.is_not_authenticated %}
+		                        {% if game.price == 0 %}
+		                            Free
+		                        {% else %}
+		                            {{ game.price }}€
+		                        {% endif %}
+		                    {%else%}
+		                        {% if game in user_games or game.owner == user %}
+		                            owned
+		                        {% else %}
+		                            {% if game.price == 0 %}
+		                                Free
+		                            {% else %}
+		                                {{ game.price }}€
+		                            {% endif %}
+		                        {% endif %}
+		                    {% endif %}
+		                </th>
+		            </tr>
+		        </div>
+			{% endfor %}
 
-<!-- if request.GET.cat in category -->
-<h1>Browsing {{ request.GET.cat }}</h1>
 
+		{% else %}
+			<!--browse ALL-->
+			<div>
+				
+			</div>
+		{% endif %}
+	</table>
+	<!--paginator for site-->
+</div>
 
 {% endblock content %}

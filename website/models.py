@@ -15,6 +15,8 @@ class RightsSupport(models.Model):
             ('admin_rights', 'admins cannot do anything yet'),
             ('no_rights', ' '),
         )
+class Category(models.Model):
+    name = models.CharField(max_length=20)
 
 class Game(models.Model):
     name = models.CharField(max_length=255)
@@ -22,6 +24,7 @@ class Game(models.Model):
     description = models.CharField(max_length=255)
     price = models.PositiveIntegerField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, default=)
     def __str__(self):
         return self.name
 

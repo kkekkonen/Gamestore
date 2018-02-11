@@ -259,15 +259,6 @@ def search(request):
     searchgame_list = Game.objects.all()
     searchtext = request.GET.get("q")
 
-    paginator = Paginator(searchgame_list, 3)
-    page = request.GET.get('page')
-    try:
-        searchgames = paginator.page(page)
-    except PageNotAnInteger:
-        searchgames = paginator.page(1)
-    except EmptyPage:
-        searchgames = paginator.page(paginator.num_pages)
-
     if searchtext:
         searchgame_list = searchgame_list.filter(
             Q(name__icontains = searchtext)
@@ -275,7 +266,6 @@ def search(request):
 
     context = {
         "games_list": searchgame_list,
-        "page": page,
     }
     
     if request.user.is_authenticated:
@@ -285,8 +275,24 @@ def search(request):
     return render(request, 'search.html', context)
 
 def categories(request):
-    #työnalla...
-    return render(request, 'categories.html')
+    games_list = Game.objects.all()
+    chosencategory = request.GET.get("cat")
+    category = Category.objects.all()
+    #if chosencategory:
+    #    games_list = games_list.filter(
+    #        Q(category__icontains = chosencategory)
+    #        )
+    context = {
+        "games_list": games_list,
+        "categorys_list":category,
+        "chosencategory": chosencategory,
+    }
+
+    if request.user.is_authenticated:
+        user_games = get_games(request.user)
+        context["user_games"] = user_games
+
+    return render(request, 'categories.html', context)
 
 @login_required
 @permission_required('website.developer_rigths')
