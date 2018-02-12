@@ -40,3 +40,10 @@
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
+.error {
+    border-style: solid;
+    border-color: red;
+}
+.errorlist {
+        color: red;
+    }
