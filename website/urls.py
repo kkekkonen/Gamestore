@@ -24,6 +24,7 @@ urlpatterns = [
     path('', views.home, name='home'),
     path('account/mygames', views.my_games, name='my_games'),
     path('account/settings', views.settings, name='settings'),
+    path('account/get_developer_permissions', views.request_developer_permissions, name='get_developer_permissions'),
     path('account/login/', views.user_login, name='user_login'),
     path('account/signup/', views.signup, name='signup'),
     path('account/logout/', views.user_logout, name='user_logout'),

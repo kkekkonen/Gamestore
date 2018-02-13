@@ -12,8 +12,6 @@ class RightsSupport(models.Model):
 
         permissions = (
             ('developer_rights', 'developers can add games'),
-            ('admin_rights', 'admins cannot do anything yet'),
-            ('no_rights', ' '),
         )
 
 class Game(models.Model):

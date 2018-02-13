@@ -27,11 +27,18 @@ from django.template.loader import render_to_string
 from .tokens import account_activation_token
 from django.core.mail import EmailMessage
 #email verification imports end
+import os
 
 def give_dev_rights(user):
     #this function is used to give a user the developer-permission
     permission = Permission.objects.get(codename="developer_rights")
     user.user_permissions.add(permission)
+
+@login_required
+def request_developer_permissions(request):
+    give_dev_rights(request.user)
+    return redirect('settings')
+
 
 def handler404(request):
     return render('registration/auth_error.html')
@@ -88,14 +95,13 @@ def settings(request):
 
 def send_activation_email(request, user, email):
     #this is a function used to send a account activation email usind django console backend
-    current_site = get_current_site(request)
     subject = 'Activate your account'
-    domain = current_site.domain
+    domain = get_current_site(request).domain
     uid = user.id
     token = account_activation_token.make_token(user)
     sender = 'admin@gmail.com'
     msc = 'use this link to activate your account:\n'
-    email = EmailMessage(subject, msc + current_site.domain + '/activate/' + str(uid)  + '/' + token, sender, [email])
+    email = EmailMessage(subject, msc + domain + '/activate/' + str(uid)  + '/' + token, sender, [email])
     email.send(fail_silently=False)
 
 def activate(request, uid, token):
@@ -118,11 +124,19 @@ def signup(request):
             raw_password = form.cleaned_data.get('password1')
             user.is_active = False
             user.save()
+            #send the activation email
             send_activation_email(request, user, form.cleaned_data.get('email'))
-            #user = auth_authenticate(username=username, password=raw_password)
-            #auth_login(request, user)
+            #if the user checked the developer checkbox, grant him dev permission
             if(request.POST.get('developer') == 'on'):
                 give_dev_rights(user)
+            #when running on heroku, render a simple template to activate account
+            if "DYNO" in os.environ:
+                context = {}
+                context['token'] = account_activation_token.make_token(user)
+                context['uid'] = user.id
+                context['domain'] = get_current_site(request).domain
+                context['username'] = username
+                return render(request, 'activation_email.html', context)
             context = {'result_message': 'Confirm your email!', 'color': 'success', 'display': True}
             return render(request, 'homepage.html', context)
         else:
