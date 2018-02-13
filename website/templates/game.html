@@ -15,7 +15,7 @@
 
 
 {% if owned %}
-	<div id="gameWindow">
+	<div id="gameWindow" class="col-sm-12" >
 		<h2 class="text-center" >{{game.name}}</h2>
 		<iframe id="iFrameWindow" class="game-window" src="{{game.url}}"></iframe>
     </div>
@@ -23,6 +23,14 @@
     <div class="game-statistics">
         <canvas id="statisticsChart"></canvas>
     </div>
+    {% endif %}
+    {% if scores %}
+        <h3 class="text-center">TOP SCORE</h3>
+        <div class="col-sm-12 game-top-score">
+            {% for score in scores %}
+                <h2>{{ forloop.counter }}. {{score.score}} points: {{score.user.username}}</h2>
+            {% endfor %}
+        </div>
     {% endif %}
 {% else %}
 	<div class="game-form game">

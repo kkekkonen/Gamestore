@@ -131,7 +131,6 @@ STATIC_ROOT = '/'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (os.path.join('static'), )
 
-SESSION_COOKIE_AGE = 600
 
 # Only when running in Heroku
 if "DYNO" in os.environ:

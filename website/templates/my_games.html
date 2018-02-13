@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block static-files %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/my_games.css' %}">
+{% endblock static-files %}
+
+{% block content %}
+    {% for game in games %}
+        <div class="col-lg-12 well">
+            <div class="col-sm-12 game-area">
+                <h2 class="game-heading">{{game.name}}</h2>
+                <div class="col-sm-12 game-buttons">
+                    {% if game.owner == request.user %}
+                    <a class="btn btn-lg btn-info" href="{% url 'edit_game' game.id %}">edit game</a>
+                    <a class="btn btn-lg btn-info" href="{% url 'delete_game' game.id %}">delete game</a>
+                    {% endif %}
+                    <a class="btn btn-lg btn-info" href="{% url 'game_view' game.id %}">view game</a>
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

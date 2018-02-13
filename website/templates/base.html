@@ -52,7 +52,7 @@
                         {% if request.user.is_authenticated %}
                             <a class="dropdown-item" href="{% url 'settings' %}">Settings</a>
                             <a class="dropdown-item" href="{% url 'my_games' %}">My Games</a>
-                            {% if perms.website.developer_rigths %} <a class="dropdown-item" href="{% url 'dev_games' %}">add or edit games</a> {% endif %}
+                            {% if perms.website.developer_rights %} <a class="dropdown-item" href="{% url 'add_game' %}">add game</a> {% endif %}
                             <a class="dropdown-item" href="{% url 'user_logout' %}">Logout</a>
                         {% else %}
                             <a class="dropdown-item" href="{% url 'user_login' %}">Login</a>

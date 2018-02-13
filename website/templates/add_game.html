@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block static-files %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/game_form.css' %}">
+{% endblock static-files %}
+
+{% block content %}
+<div class="col-lg-12 well">
+    <div class="col-sm-12">
+        <form action="{% url 'add_game' %}" method="POST"class="form-game">
+            {% csrf_token %}
+            <h2 class="form-game-heading">Add Game</h2>
+            <div class="col-sm-12">
+                {% for field in form %}
+                    <div class="form-group">
+                        {{ field.label_tag }} {{ field }}
+                        {{ field.errors }}
+                        {% if field.help_text %}
+                        <p class="help">{{ field.help_text|safe }}</p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+            <button type="submit" class="btn btn-lg btn-info">
+            <span></span>
+                Add Game
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

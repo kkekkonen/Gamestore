@@ -13,9 +13,17 @@ class GameForm(forms.Form):
     error_messages={'required': 'Your game needs a URL!'})
     description = forms.CharField(label = 'Description', required=True,
     error_messages={'required': 'Your game needs a description for some reason!'})
-    price = forms.IntegerField(label = 'Price', required = True,
-    error_messages={'required': 'Your game needs a price!', 'min_value':'your game cannot cost less than 0!'}, min_value = 0)
+    price = forms.FloatField(label = 'Price', required = True,
+    error_messages={'required': 'Your game needs a price!', 'min_value':'your game cannot cost less than 0!', 'max_value': 'your game cannot cost more than 10000!'}, min_value = 0.0, max_value = 10000.0)
 
+    def __init__(self, *args, **kwargs):
+        super(GameForm, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+        if self.errors:
+            for f_name in self.fields:
+                if f_name in self.errors:
+                    self.fields[f_name].widget.attrs['class'] = "form-control error"
 """
 # WORK IN PROGRESS
 class Verification(models.Model):
@@ -41,9 +49,9 @@ class Verification(models.Model):
 """
 
 class SignupForm(UserCreationForm):
-    email = forms.EmailField(label='Email', required=True)
-    first_name = forms.CharField(label='First name', max_length=30, required=True)
-    last_name = forms.CharField(label='Last name', max_length=50, required=True)
+    email = forms.EmailField(widget=forms.TextInput(attrs={'class':'form-control'}), label='Email', required=True)
+    first_name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}), label='First name', max_length=30, required=True)
+    last_name = forms.CharField(widget=forms.TextInput(attrs={'class':'form-control'}), label='Last name', max_length=50, required=True)
 
     class Meta:
         model = User
@@ -56,6 +64,14 @@ class SignupForm(UserCreationForm):
             'password2',
         )
 
+    def __init__(self, *args, **kwargs):
+        super(SignupForm, self).__init__(*args, **kwargs)
+        for visible in self.visible_fields():
+            visible.field.widget.attrs['class'] = 'form-control'
+        if self.errors:
+            for f_name in self.fields:
+                if f_name in self.errors:
+                    self.fields[f_name].widget.attrs['class'] = "form-control error"
 
     def save(self, commit=True):
         user = super(SignupForm, self).save(commit=False)

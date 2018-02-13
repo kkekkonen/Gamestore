@@ -20,3 +20,10 @@
 .form-game .form-control:focus {
     z-index: 2;
 }
+.error {
+    border-style: solid;
+    border-color: red;
+}
+.errorlist {
+        color: red;
+    }
