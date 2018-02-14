@@ -12,13 +12,12 @@ class RightsSupport(models.Model):
 
         permissions = (
             ('developer_rights', 'developers can add games'),
-            ('admin_rights', 'admins cannot do anything yet'),
-            ('no_rights', ' '),
         )
 
 class Game(models.Model):
     name = models.CharField(max_length=255)
     url = models.URLField(blank=False)
+    image_url = models.URLField()
     description = models.CharField(max_length=255)
     price = models.FloatField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -10,6 +10,9 @@
         <div class="col-lg-12 well">
             <div class="col-sm-12 game-area">
                 <h2 class="game-heading">{{game.name}}</h2>
+                {% if game.image_url != "" %}
+                <div class="col-sm-12"><img class="img-fluid rounded" src={{game.image_url}} alt="{{game.description}}"></div>
+                {% endif %}
                 <div class="col-sm-12 game-buttons">
                     {% if game.owner == request.user %}
                     <a class="btn btn-lg btn-info" href="{% url 'edit_game' game.id %}">edit game</a>

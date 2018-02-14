@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class = "text-center">
+    <h4>Hello {{ username }},</h4>
+    <a href="http://{{ domain }}{% url 'activate' uid=uid token=token %}">Click here to confirm your account activation</a>
+    <p>WARNING! This page can only be accessed once</p>
+</div>
+{% endblock content %}

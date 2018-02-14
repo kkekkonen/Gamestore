@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.decorators import permission_required
 
 from django.urls import reverse
-
+from django.forms.utils import ErrorList
 from django.db import models
 from django.contrib.auth.models import Permission
 from django.shortcuts import render, redirect, get_object_or_404
@@ -19,13 +19,27 @@ import json
 import time
 from datetime import datetime
 from collections import defaultdict
-
-def is_developer(user):
-    return user.has_perm('website.developer_rights')
+#these imports are used by email verification (activate, signup, send_activation_email)
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.encoding import force_bytes, force_text
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.template.loader import render_to_string
+from .tokens import account_activation_token
+from django.core.mail import EmailMessage
+#email verification imports end
+import os
+from urllib.request import urlopen
 
 def give_dev_rights(user):
+    #this function is used to give a user the developer-permission
     permission = Permission.objects.get(codename="developer_rights")
     user.user_permissions.add(permission)
+
+@login_required
+def request_developer_permissions(request):
+    give_dev_rights(request.user)
+    return redirect('settings')
+
 
 def handler404(request):
     return render('registration/auth_error.html')
@@ -52,7 +66,6 @@ def user_login(request):
             }
             return render(request, 'registration/auth_error.html', context)
 
-#@permission_required('website.developer_rights')
 @login_required
 def settings(request):
     context = {
@@ -81,18 +94,52 @@ def settings(request):
             context['mesage_type'] = 'bg-danger'
             return render(request, 'account/settings.html', context)
 
+def send_activation_email(request, user, email):
+    #this is a function used to send a account activation email usind django console backend
+    subject = 'Activate your account'
+    domain = get_current_site(request).domain
+    uid = user.id
+    token = account_activation_token.make_token(user)
+    sender = 'admin@gmail.com'
+    msc = 'use this link to activate your account:\n'
+    email = EmailMessage(subject, msc + domain + '/activate/' + str(uid)  + '/' + token, sender, [email])
+    email.send(fail_silently=False)
+
+def activate(request, uid, token):
+    #function used to activate a new account.
+    user = get_object_or_404(User,pk=uid)
+    if user is not None and account_activation_token.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return redirect('user_login')
+    else:
+        context = {'result_message': 'Invalid activation link!', 'color': 'danger', 'display': True}
+        return render(request, 'homepage.html', context)
+
 def signup(request):
     if request.method == 'POST':
         form = SignupForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save(commit=False)
             username = form.cleaned_data.get('username')
             raw_password = form.cleaned_data.get('password1')
-            user = auth_authenticate(username=username, password=raw_password)
-            auth_login(request, user)
+            user.is_active = False
+            user.save()
+            #send the activation email
+            send_activation_email(request, user, form.cleaned_data.get('email'))
+            #if the user checked the developer checkbox, grant him dev permission
             if(request.POST.get('developer') == 'on'):
                 give_dev_rights(user)
-            return redirect('home')
+            #when running on heroku, render a simple template to activate account
+            if "DYNO" in os.environ:
+                context = {}
+                context['token'] = account_activation_token.make_token(user)
+                context['uid'] = user.id
+                context['domain'] = get_current_site(request).domain
+                context['username'] = username
+                return render(request, 'activation_email.html', context)
+            context = {'result_message': 'Confirm your email!', 'color': 'success', 'display': True}
+            return render(request, 'homepage.html', context)
         else:
             return render(request, 'registration/signup.html', {'form': form})
     else:
@@ -102,30 +149,46 @@ def signup(request):
 def home(request):
     return render(request, 'home.html')
 
-def verify_email(request):
-    pass
+def check_image_url(url):
+    #this function is used to check if a url can be used to load a image
+    try:
+        #check that the url works
+        urlopen(url)
+        #check that the file url leads to image
+        if any([url.endswith(e) for e in [".jpg", ".jpeg", ".png", ".gif", "svg"]]):
+            return True
+    except Exception as e:
+        pass
+    return False
 
 @permission_required('website.developer_rights')
 @login_required
 def add_game(request):
+    #function used to add a new game to the service. user must be logged in and
+    # have permission to add Games
+    # uses GameForm to render the form.
     if(request.method == "POST"):
         name = request.POST.get('name')
         url = request.POST.get('url')
+        image_url = request.POST.get('image_url')
         description = request.POST.get('description')
         price = request.POST.get('price')
-        data = {"name":name, "url":url, "description":description, "price":price}
+        data = {"name":name, "url":url, "image_url":image_url, "description":description, "price":price}
         form = GameForm(data)
+        if image_url != "" and not check_image_url(image_url):
+            form.add_error("image_url", "invalid image url")
         if form.is_valid():
             game_data = {
                 'name': form.cleaned_data['name'],
                 'url': form.cleaned_data['url'],
+                'image_url': form.cleaned_data['image_url'],
                 'description': form.cleaned_data['description'],
                 'price':form.cleaned_data['price'],
                 'owner':request.user,
             }
             game = Game(**game_data)
             game.save()
-            return redirect('my_games')
+            return redirect('edit_game', game_id=game.id)
         else:
             context = {}
             context["form"] = form
@@ -135,6 +198,7 @@ def add_game(request):
 
 
 def make_checksum(pid, sid, amount, secret_key):
+    #function used to make the checksum used when buying the game
     checksumstr = "pid={}&sid={}&amount={}&token={}".format(pid, sid, amount, secret_key)
     m = md5(checksumstr.encode("ascii"))
     checksum = m.hexdigest()
@@ -142,6 +206,10 @@ def make_checksum(pid, sid, amount, secret_key):
 
 @login_required
 def game_view(request, game_id, display=False, message="", color=""):
+    #function used when rendering the gameview.
+    #if the user owns/has purchased the game, he sees the game and top score.
+    #owner also sees the selling statistics.
+    #otherwise the user has the option to purchase the game
     game = get_object_or_404(Game, pk=game_id)
     user_games = get_games(request.user)
     context = {}
@@ -163,6 +231,7 @@ def game_view(request, game_id, display=False, message="", color=""):
         context["sid"] = sid
         context["checksum"]  = checksum
     else:
+        #populate the score list. Scores are not visible if there are no scores for the game
         context["scores"] = Score.objects.filter(game=game).order_by('-score')[:5]
         context["owned"] = True
     return render(request, 'game.html', context)
@@ -189,10 +258,13 @@ def game_buy(request, game_id):
         checksumstr = "pid={}&ref={}&result={}&token={}".format(pid, ref, result, "aa3dfa29c26efc70b4795f4cfb078f20")
         checksum_test = md5(checksumstr.encode("ascii")).hexdigest()
         if result == "success" and checksum == checksum_test and pid == pid_test:
-            game = Game.objects.get(pk=game_id)
+            game = get_object_or_404(Game, pk=game_id)
             if game not in get_games(request.user):
                 Purchase.objects.create(game=game, user=request.user, timestamp=datetime.now())
-            return game_view(request, game_id, True, "Purchase successful", "success")
+            else:
+                #you already have the game
+                raise Http404("you already own the game")
+            return redirect('game_view', game_id=game_id)
         elif result == "cancel" and checksum == checksum_test and pid == pid_test:
             return game_view(request, game_id, True, "Purchase canceled", "warning")
         elif result == "error":
@@ -212,6 +284,9 @@ def save_score(request, game, score):
             Score.objects.create(game=game, user=request.user, score=score)
     except Score.DoesNotExist:
         Score.objects.create(game=game, user=request.user, score=score)
+    except ValueError:
+        #the score was not Int.
+        pass
 
 @login_required
 def load_gameState(request, game):
@@ -227,6 +302,8 @@ def save_gameState(request, game, json_string):
     #this function saves the game when the users request's messagetype is "SAVE". Used in function game_request below
     #the service deletes old saves and saves the json the user has sent in the Purchase-model.
     try:
+        #only 1 gamestate is saved for a user per game.
+        #delete the users old gamestates for the game.
         old_gameState = GameState.objects.filter(user=request.user, game=game)
         old_gameState.delete()
     except GameState.DoesNotExist:
@@ -240,6 +317,7 @@ def game_request(request, game_id):
     #function processes all the request made by the game/user to the service such as save/loads
     game = get_object_or_404(Game, pk=game_id)
     if(request.method == "POST"):
+        #the request is a POST-request. User is trying to save a Score/Gamestate
         json_string = request.read().decode('utf-8')
         messageType = json.loads(json_string).get('messageType')
         if messageType == "SAVE":
@@ -248,20 +326,13 @@ def game_request(request, game_id):
             save_score(request, game, json.loads(json_string).get("score"))
             return HttpResponse(status=204)
     else:
+        #the request should be a LOAD_REQUEST (GET).
         messageType = request.GET.get("messageType")
         if messageType == "LOAD_REQUEST":
             data = load_gameState(request, game)
             data["messageType"] = "LOAD"
             return HttpResponse(json.dumps(data), content_type='application/json')
-    return HttpResponse(status=204)
-
-
-def is_int(s):
-    try:
-        int(s)
-        return True
-    except ValueError:
-        return False
+    raise Http404("invalid game request")
 
 @login_required
 @permission_required('website.developer_rights')
@@ -271,21 +342,30 @@ def edit_game(request, game_id):
     #check that the user owns the game he is about to edit
     if(request.user == game.owner):
         if(request.method == "POST"):
-            #game_id = request.POST.get("id")
+            #if the user sent the form, process the data
             name = request.POST.get("name")
             url = request.POST.get("url")
             description = request.POST.get("description")
             price = request.POST.get("price")
-            data = {"name":name, "url":url, "description":description, "price":price}
+            image_url = request.POST.get("image_url")
+            data = {"name":name, "url":url, "image_url":image_url, "description":description, "price":price}
             form = GameForm(data)
+            if image_url != "" and not check_image_url(image_url):
+                form.add_error("image_url", "invalid image url")
             if form.is_valid():
-                game.__dict__.update(**data)
+                game.name = form.cleaned_data['name']
+                game.url = form.cleaned_data['url']
+                game.image_url = form.cleaned_data['image_url']
+                game.description = form.cleaned_data['description']
+                game.price = form.cleaned_data['price']
+                game.save()
             return render(request, 'edit_game.html', {"form": form, "game": game} )
         else:
-            data = {"name":game.name, "url":game.url, "description":game.description, "price":game.price}
+            #if the user did not post the form, send form with the current values of the Game
+            data = {"name":game.name, "url":game.url, "description":game.description, "price":game.price, "image_url":game.image_url}
             form = GameForm(initial=data)
             return render(request, 'edit_game.html', {"form": form, "game": game} )
-    return Http404
+    raise Http404("invalid game edit request")
 
 @login_required
 @permission_required('website.developer_rigths')
@@ -312,6 +392,7 @@ def game_stats(request, game_id):
 
 @login_required
 def my_games(request):
+    #this function is used in my_games-page to populate the list of games
     context = {"games": get_games(request.user)}
     return render(request, 'my_games.html', context)
 
