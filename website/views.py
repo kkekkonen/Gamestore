@@ -293,6 +293,7 @@ def load_gameState(request, game):
     #this function tries to load the gamestate the user has previously saved. Used in function game_request below
     try:
         gamestate = GameState.objects.get(game=game, user=request.user).gamestate
+        data["messageType"] = "LOAD"
     except GameState.DoesNotExist:
         return  {"messageType": "ERROR", "info": "Gamestate could not be loaded, you don't have any saves for this game!"}
     return json.loads(gamestate)
@@ -330,7 +331,6 @@ def game_request(request, game_id):
         messageType = request.GET.get("messageType")
         if messageType == "LOAD_REQUEST":
             data = load_gameState(request, game)
-            data["messageType"] = "LOAD"
             return HttpResponse(json.dumps(data), content_type='application/json')
     raise Http404("invalid game request")
 
