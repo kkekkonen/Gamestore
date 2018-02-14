@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='game',
             name='image_url',
-            field=models.URLField(default='http://weclipart.com/google+images+sun+clipart'),
+            field=models.URLField(default=''),
             preserve_default=False,
         ),
     ]
