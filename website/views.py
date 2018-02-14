@@ -241,10 +241,13 @@ def game_buy(request, game_id):
         checksumstr = "pid={}&ref={}&result={}&token={}".format(pid, ref, result, "aa3dfa29c26efc70b4795f4cfb078f20")
         checksum_test = md5(checksumstr.encode("ascii")).hexdigest()
         if result == "success" and checksum == checksum_test and pid == pid_test:
-            game = Game.objects.get(pk=game_id)
+            game = get_object_or_404(Game, pk=game_id)
             if game not in get_games(request.user):
                 Purchase.objects.create(game=game, user=request.user, timestamp=datetime.now())
-            return game_view(request, game_id, True, "Purchase successful", "success")
+            else:
+                #you already have the game
+                raise Http404("you already own the game")
+            return redirect('game_view', game_id=game_id)
         elif result == "cancel" and checksum == checksum_test and pid == pid_test:
             return game_view(request, game_id, True, "Purchase canceled", "warning")
         elif result == "error":
@@ -265,6 +268,7 @@ def save_score(request, game, score):
     except Score.DoesNotExist:
         Score.objects.create(game=game, user=request.user, score=score)
     except ValueError:
+        print("were here")
         #the score was not Int.
         pass
 
@@ -312,7 +316,7 @@ def game_request(request, game_id):
             data = load_gameState(request, game)
             data["messageType"] = "LOAD"
             return HttpResponse(json.dumps(data), content_type='application/json')
-    return Http404()
+    raise Http404("invalid game request")
 
 @login_required
 @permission_required('website.developer_rights')
@@ -337,7 +341,7 @@ def edit_game(request, game_id):
             data = {"name":game.name, "url":game.url, "description":game.description, "price":game.price}
             form = GameForm(initial=data)
             return render(request, 'edit_game.html', {"form": form, "game": game} )
-    return Http404
+    raise Http404("invalid game edit request")
 
 @login_required
 @permission_required('website.developer_rigths')
