@@ -268,7 +268,6 @@ def save_score(request, game, score):
     except Score.DoesNotExist:
         Score.objects.create(game=game, user=request.user, score=score)
     except ValueError:
-        print("were here")
         #the score was not Int.
         pass
 
