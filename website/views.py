@@ -2,7 +2,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.decorators import permission_required
 
 from django.urls import reverse
-
+from django.forms.utils import ErrorList
 from django.db import models
 from django.contrib.auth.models import Permission
 from django.shortcuts import render, redirect, get_object_or_404
@@ -28,6 +28,7 @@ from .tokens import account_activation_token
 from django.core.mail import EmailMessage
 #email verification imports end
 import os
+from urllib.request import urlopen
 
 def give_dev_rights(user):
     #this function is used to give a user the developer-permission
@@ -148,30 +149,46 @@ def signup(request):
 def home(request):
     return render(request, 'home.html')
 
+def check_image_url(url):
+    #this function is used to check if a url can be used to load a image
+    try:
+        #check that the url works
+        urlopen(url)
+        #check that the file url leads to image
+        if any([url.endswith(e) for e in [".jpg", ".jpeg", ".png", ".gif", "svg"]]):
+            return True
+    except Exception as e:
+        pass
+    return False
+
 @permission_required('website.developer_rights')
 @login_required
 def add_game(request):
-    #function used to add a new game to the service. user mustbe logged in and
+    #function used to add a new game to the service. user must be logged in and
     # have permission to add Games
     # uses GameForm to render the form.
     if(request.method == "POST"):
         name = request.POST.get('name')
         url = request.POST.get('url')
+        image_url = request.POST.get('image_url')
         description = request.POST.get('description')
         price = request.POST.get('price')
-        data = {"name":name, "url":url, "description":description, "price":price}
+        data = {"name":name, "url":url, "image_url":image_url, "description":description, "price":price}
         form = GameForm(data)
+        if image_url != "" and not check_image_url(image_url):
+            form.add_error("image_url", "invalid image url")
         if form.is_valid():
             game_data = {
                 'name': form.cleaned_data['name'],
                 'url': form.cleaned_data['url'],
+                'image_url': form.cleaned_data['image_url'],
                 'description': form.cleaned_data['description'],
                 'price':form.cleaned_data['price'],
                 'owner':request.user,
             }
             game = Game(**game_data)
             game.save()
-            return redirect('my_games')
+            return redirect('edit_game', game_id=game.id)
         else:
             context = {}
             context["form"] = form
@@ -330,14 +347,22 @@ def edit_game(request, game_id):
             url = request.POST.get("url")
             description = request.POST.get("description")
             price = request.POST.get("price")
-            data = {"name":name, "url":url, "description":description, "price":price}
+            image_url = request.POST.get("image_url")
+            data = {"name":name, "url":url, "image_url":image_url, "description":description, "price":price}
             form = GameForm(data)
+            if image_url != "" and not check_image_url(image_url):
+                form.add_error("image_url", "invalid image url")
             if form.is_valid():
-                game.__dict__.update(**data)
+                game.name = form.cleaned_data['name']
+                game.url = form.cleaned_data['url']
+                game.image_url = form.cleaned_data['image_url']
+                game.description = form.cleaned_data['description']
+                game.price = form.cleaned_data['price']
+                game.save()
             return render(request, 'edit_game.html', {"form": form, "game": game} )
         else:
             #if the user did not post the form, send form with the current values of the Game
-            data = {"name":game.name, "url":game.url, "description":game.description, "price":game.price}
+            data = {"name":game.name, "url":game.url, "description":game.description, "price":game.price, "image_url":game.image_url}
             form = GameForm(initial=data)
             return render(request, 'edit_game.html', {"form": form, "game": game} )
     raise Http404("invalid game edit request")

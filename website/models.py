@@ -17,6 +17,7 @@ class RightsSupport(models.Model):
 class Game(models.Model):
     name = models.CharField(max_length=255)
     url = models.URLField(blank=False)
+    image_url = models.URLField()
     description = models.CharField(max_length=255)
     price = models.FloatField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
