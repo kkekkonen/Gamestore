@@ -98,7 +98,7 @@ def send_activation_email(request, user, email):
     #this is a function used to send a account activation email usind django console backend
     subject = 'Activate your account'
     domain = get_current_site(request).domain
-    uid = user.id
+    uid = urlsafe_base64_encode(force_bytes(user.id)).decode()
     token = account_activation_token.make_token(user)
     sender = 'admin@gmail.com'
     msc = 'use this link to activate your account:\n'
@@ -107,7 +107,12 @@ def send_activation_email(request, user, email):
 
 def activate(request, uid, token):
     #function used to activate a new account.
-    user = get_object_or_404(User,pk=uid)
+    try:
+        uid_byte = uid.encode()
+        user_id = force_text(urlsafe_base64_decode(uid_byte))
+        user = User.objects.get(pk=user_id)
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
     if user is not None and account_activation_token.check_token(user, token):
         user.is_active = True
         user.save()
