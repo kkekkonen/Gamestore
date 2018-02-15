@@ -26,29 +26,6 @@ class GameForm(forms.Form):
                 if f_name in self.errors:
                     self.fields[f_name].widget.attrs['class'] = "form-control error"
 
-"""
-# WORK IN PROGRESS
-class Verification(models.Model):
-    belongs_to = models.ForeignKey(User, on_delete=models.CASCADE)
-    code = models.CharField(max_length=6)
-
-    def generate_code(self):
-        return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-
-    def send_code(self):
-        connection = mail.get_connection()
-        link = reverse('verify_email')
-        to_be_sent = mail.EmailMessage(
-            'Your verification code',
-            'Please visit this link: ' + link,
-            'admin@gamestore.com',
-            [''],
-            connection=connection
-        )
-
-    def save(self):
-        pass
-"""
 
 class SignupForm(UserCreationForm):
     email = forms.EmailField(label='Email', required=True)
