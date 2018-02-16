@@ -372,7 +372,7 @@ def edit_game(request, game_id):
     raise Http404("invalid game edit request")
 
 @login_required
-@permission_required('website.developer_rigths')
+@permission_required('website.developer_rights')
 def game_stats(request, game_id):
     #this function is used to create a json used to display selling data of a game
     game = get_object_or_404(Game, pk=game_id)
