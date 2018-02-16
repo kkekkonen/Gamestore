@@ -2,10 +2,10 @@
 
 {% block content %}
 <!--left category nav-->
-<div class="navbar navbar-inverse navbar-fixed-left">
-	<ul class="nav navbar-nav">
+<div class="collapse navbar-collapse navbar-ex1-collapse">
+	<ul class="nav navbar-nav side-nav">
 		{% for category in categorys_list %}
-			<li class="nav-item">
+			<li>
 				<a href="{% url 'categories_page' %}?cat={{ category.name }}">{{ category.name }}</a>
 			</li>
 		{% endfor %}
@@ -22,54 +22,48 @@
 		<h1>Browsing All</h1>
 	{% endif %}
 	<!--Result content-->
-	<H2>Results:</H2>
 	<table class="table">
 	    <thead class="thead-inverse">
+	    	<!--<th>Image</th>-->
 	        <th>Game</th>
 	        <th>Description</th>
 	        <th>Price</th>
 	    </thead>
-		{% if request.GET.cat in category_list %}
-			{% for game in games_list %}
-		        <div class="searchresult">
-		            <tr {% if request.user.is_authenticated %} style="cursor: pointer;" onclick="window.location.href='{{ game.url }}' {% endif %};">
-		                <th>
-		                    {{ game.name }}
-		                </th>
-		                <th>
-		                    {{ game.description|truncatechars:100 }}
-		                </th>
-		                <th>
-		                    <!--Price or owned-->
-		                    {% if request.user.is_not_authenticated %}
-		                        {% if game.price == 0 %}
-		                            Free
-		                        {% else %}
-		                            {{ game.price }}€
-		                        {% endif %}
-		                    {%else%}
-		                        {% if game in user_games or game.owner == user %}
-		                            owned
-		                        {% else %}
-		                            {% if game.price == 0 %}
-		                                Free
-		                            {% else %}
-		                                {{ game.price }}€
-		                            {% endif %}
-		                        {% endif %}
-		                    {% endif %}
-		                </th>
-		            </tr>
-		        </div>
-			{% endfor %}
-
-
-		{% else %}
-			<!--browse ALL-->
-			<div>
-				
-			</div>
-		{% endif %}
+		{% for game in games_list %}
+	        <div class="searchresult">
+	            <tr {% if request.user.is_authenticated %} style="cursor: pointer;" onclick="window.location.href='{{ game.url }}' {% endif %};">
+	            	<!--<th>
+	            		game.image_url }}
+	            	</th>-->
+	                <th>
+	                    {{ game.name }}
+	                </th>
+	                <th>
+	                    {{ game.description|truncatechars:100 }}
+	                </th>
+	                <th>
+	                    <!--Price or owned-->
+	                    {% if request.user.is_not_authenticated %}
+	                        {% if game.price == 0 %}
+	                            Free
+	                        {% else %}
+	                            {{ game.price }}€
+	                        {% endif %}
+	                    {%else%}
+	                        {% if game in user_games or game.owner == user %}
+	                            owned
+	                        {% else %}
+	                            {% if game.price == 0 %}
+	                                Free
+	                            {% else %}
+	                                {{ game.price }}€
+	                            {% endif %}
+	                        {% endif %}
+	                    {% endif %}
+	                </th>
+	            </tr>
+	        </div>
+		{% endfor %}
 	</table>
 	<!--paginator for site-->
 </div>

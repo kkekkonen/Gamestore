@@ -10,18 +10,26 @@
     <H2>Results:</H2>
     <table class="table">
         <thead class="thead-inverse">
+            <!--<th>Picture</th>-->
             <th>Game</th>
             <th>Description</th>
+            <th>Category</th>
             <th>Price</th>
         </thead>
     {% for game in games_list %}
         <div class="searchresult">
             <tr {% if request.user.is_authenticated %} style="cursor: pointer;" onclick="window.location.href='{{ game.url }}' {% endif %};">
+                <!--<th>
+                     game.image_url }}
+                </th>-->
                 <th>
                     {{ game.name }}
                 </th>
                 <th>
                     {{ game.description|truncatechars:100 }}
+                </th>
+                <th>
+                    {{ game.category }}
                 </th>
                 <th>
                     <!--Price or owned-->

@@ -278,10 +278,11 @@ def categories(request):
     games_list = Game.objects.all()
     chosencategory = request.GET.get("cat")
     category = Category.objects.all()
-    #if chosencategory:
-    #    games_list = games_list.filter(
-    #        Q(category__icontains = chosencategory)
-    #        )
+    if chosencategory:    
+        if len(chosencategory) > 0:
+            games_list = games_list.filter(
+                #Q(category__icontains = chosencategory)
+                )
     context = {
         "games_list": games_list,
         "categorys_list":category,
