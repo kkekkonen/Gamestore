@@ -15,11 +15,12 @@
 
 
 {% if owned %}
+    <p id="url" hidden > {{url}}</p>
 	<div id="gameWindow" class="col-sm-12" >
 		<h2 class="text-center" >{{game.name}}</h2>
 		<iframe id="iFrameWindow" class="game-window" src="{{game.url}}"></iframe>
     </div>
-    {% if perms.website.developer_rigths %}
+    {% if creator %}
     <div class="game-statistics">
         <canvas id="statisticsChart"></canvas>
     </div>

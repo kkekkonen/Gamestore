@@ -213,6 +213,10 @@ def game_view(request, game_id, display=False, message="", color=""):
     game = get_object_or_404(Game, pk=game_id)
     user_games = get_games(request.user)
     context = {}
+    if "DYNO" in os.environ:
+        context["url"] = get_current_site(request).domain + "/games/" + str(game_id)
+    else:
+        context["url"] = "http://localhost:8000/games/" + str(game_id)
     context["game"] = game
     context["display"] = display
     context["result_message"] = message
@@ -263,8 +267,8 @@ def game_buy(request, game_id):
                 Purchase.objects.create(game=game, user=request.user, timestamp=datetime.now())
             else:
                 #you already have the game
-                raise Http404("you already own the game")
-            return redirect('game_view', game_id=game_id)
+                return redirect('game_view', game_id=game_id)
+            return game_view(request, game_id, True, "Purchase successfull", "success")
         elif result == "cancel" and checksum == checksum_test and pid == pid_test:
             return game_view(request, game_id, True, "Purchase canceled", "warning")
         elif result == "error":
@@ -292,11 +296,11 @@ def save_score(request, game, score):
 def load_gameState(request, game):
     #this function tries to load the gamestate the user has previously saved. Used in function game_request below
     try:
-        gamestate = GameState.objects.get(game=game, user=request.user).gamestate
-        data["messageType"] = "LOAD"
+        gamestate = eval(GameState.objects.get(game=game, user=request.user).gamestate)
+        gamestate["messageType"] = "LOAD"
     except GameState.DoesNotExist:
         return  {"messageType": "ERROR", "info": "Gamestate could not be loaded, you don't have any saves for this game!"}
-    return json.loads(gamestate)
+    return gamestate
 
 @login_required
 def save_gameState(request, game, json_string):
@@ -310,7 +314,6 @@ def save_gameState(request, game, json_string):
     except GameState.DoesNotExist:
         pass
     GameState.objects.create(game=game, user=request.user, gamestate=json_string)
-    return HttpResponse(status=204)
 
 
 @login_required
@@ -323,6 +326,7 @@ def game_request(request, game_id):
         messageType = json.loads(json_string).get('messageType')
         if messageType == "SAVE":
             save_gameState(request, game, json_string)
+            return HttpResponse(status=204)
         elif messageType == "SCORE":
             save_score(request, game, json.loads(json_string).get("score"))
             return HttpResponse(status=204)

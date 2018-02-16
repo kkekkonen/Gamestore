@@ -69,15 +69,16 @@ Tools used: HTML5, CSS (+Bootstrap), JS (+Jquery, Chart.js), Django Framework (+
 
 #### Minimum requirements ####
 
-User can register as a player or a developer. Developers can add games to their inventory and see list of game sales. Players buy/play games, see high scores and save their own scores.
+User can register as a player or a developer. Developers can add games to their inventory and manage their games. Players buy/play games, see high scores and save their own scores.
 
 #### Authentication ####
 
-Players and developers can register/login/logout. Email validation is done with django console backend. On heroku a link leading to the activation url is shown after successfull registration.
+Players and developers can register/login/logout. Email validation is done with django console backend. On heroku a link leading to the activation url is shown after successfull registration. The activation token is made with Django's PasswordResetTokenGenerator
 
 #### Basic player functionalities ####
 
 Players can buy games using the courses mockup payment service. After buying the game the player can play the game.
+more about player stuff here
 
 #### Basic developer functionalities ####
 
@@ -85,20 +86,23 @@ Developers can add/modify/delete games they own. Developers can also see sales s
 
 #### Game/service interaction ####
 
-The service supports the course project message protocol. Users can save their high score.
+The service supports the course project message protocol. Users can save their high score, if the game supports such feature. More about game/service interaction on 2.4 Save/load feature.
 
 #### Quality of Work ####
 in progress
+
+testing:
+css and js files have been validated using W3C Validation service and JSlint. The website has also been manually tested.
 
 ### 2.4 Additional Features ###
 
 #### Save/load and resolution feature ####
 
-Players can save and load gameStates. The service only keeps one gamestate per user per game stored. Also supports the SETTING message.
+Players can save and load gameStates. The gamestate is saved in the database as a textfield. This enables the custom gamestates for each game. The service only keeps one gamestate per user per game stored. Also supports the SETTING message to set the IFrame width and length.
 
 #### 3rd party login ####
 
-Users can log in using Google accounts. The service uses Python Social Auth.
+Users can log in using Google accounts. The service uses Python Social Auth app. Users with Google accounts can be both players and developers.
 
 #### RESTful API ####
 
