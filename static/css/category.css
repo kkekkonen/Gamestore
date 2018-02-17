@@ -1,0 +1,14 @@
+.uliuli {
+	list-style-type: none;
+	margin: 0 ;
+	padding: 0;
+}
+
+.nav-item {
+	display: inline;
+}
+
+.littlepic {
+	max-width: 96px;
+	max-height: 96px;
+}

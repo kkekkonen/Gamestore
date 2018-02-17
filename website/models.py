@@ -15,24 +15,14 @@ class RightsSupport(models.Model):
             ('admin_rights', 'admins cannot do anything yet'),
             ('no_rights', ' '),
         )
-class Category(models.Model):
-    Action = 'Act'
-    Arcade = 'Arc'
-    Indie = 'Ind'
-    Puzzle = 'Puz'
-    Strategy = 'Str'
-    category_choices = (
-        (Action, 'Action'),
-        (Arcade, 'Arcade'),
-        (Indie, 'Indie'),
-        (Puzzle, 'Puzzle'),
-        (Strategy, 'Strategy'),
-    )
-    gamecategory = models.CharField(
-        max_length = 3,
-        choices = category_choices,
-        default = Action,
-    )
+
+CATEGORY_CHOICES = (
+    ('Action', 'Action'),
+    ('Arcade', 'Arcade'),
+    ('Indie', 'Indie'),
+    ('Puzzle', 'Puzzle'),
+    ('Strategy', 'Strategy'),
+)
 
 class Game(models.Model):
     name = models.CharField(max_length=255)
@@ -40,7 +30,8 @@ class Game(models.Model):
     description = models.CharField(max_length=255)
     price = models.PositiveIntegerField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
-    category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
+    category = models.CharField(max_length = 100, choices = CATEGORY_CHOICES, default = 'a')
+
     def __str__(self):
         return self.name
 

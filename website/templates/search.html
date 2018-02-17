@@ -1,66 +1,71 @@
 {% extends "base.html" %}
 
-{% block content %}
+{% block static-files %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/search.css' %}">
+{% endblock static-files %}
 
-<form method='GET' class="form-inline my-2 my-lg-0">
-    <input name='q' value='{{ request.GET.q }}' class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
-    <input class="btn btn-outline-success my-2 my-sm-0" type="submit" value='Search'>
-</form>
-{% if request.GET.q|length > 0 %}
-    <H2>Results:</H2>
-    <table class="table">
-        <thead class="thead-inverse">
-            <!--<th>Picture</th>-->
-            <th>Game</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Price</th>
-        </thead>
-    {% for game in games_list %}
-        <div class="searchresult">
-            <tr {% if request.user.is_authenticated %} style="cursor: pointer;" onclick="window.location.href='{{ game.url }}' {% endif %};">
-                <!--<th>
-                     game.image_url }}
-                </th>-->
-                <th>
-                    {{ game.name }}
-                </th>
-                <th>
-                    {{ game.description|truncatechars:100 }}
-                </th>
-                <th>
-                    {{ game.category }}
-                </th>
-                <th>
-                    <!--Price or owned-->
-                    {% if request.user.is_not_authenticated %}
-                        {% if game.price == 0 %}
-                            Free
-                        {% else %}
-                            {{ game.price }}€
-                        {% endif %}
-                    {%else%}
-                        {% if game in user_games or game.owner == user %}
-                            owned
-                        {% else %}
+{% block content %}
+<div class="container">
+    <form method='GET' class="form-inline my-2 my-lg-0">
+        <input name='q' value='{{ request.GET.q }}' class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+        <input class="btn btn-outline-success my-2 my-sm-0" type="submit" value='Search'>
+    </form>
+    {% if request.GET.q|length > 0 %}
+        <H2>Results:</H2>
+        <table class="table">
+            <thead class="thead-inverse">
+                <!--<th>Picture</th>-->
+                <th>Game</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Price</th>
+            </thead>
+        {% for game in games_list %}
+            <div class="searchresult">
+                <tr {% if request.user.is_authenticated %} style="cursor: pointer;" onclick="window.location.href='{{ game.url }}' {% endif %};">
+                    <!--<th>
+                         <img src="game.image_url }}">
+                    </th>-->
+                    <th>
+                        {{ game.name }}
+                    </th>
+                    <th>
+                        {{ game.description|truncatechars:100 }}
+                    </th>
+                    <th>
+                        {{ game.category }}
+                    </th>
+                    <th>
+                        <!--Price or owned-->
+                        {% if request.user.is_not_authenticated %}
                             {% if game.price == 0 %}
                                 Free
                             {% else %}
                                 {{ game.price }}€
                             {% endif %}
+                        {%else%}
+                            {% if game in user_games or game.owner == user %}
+                                owned
+                            {% else %}
+                                {% if game.price == 0 %}
+                                    Free
+                                {% else %}
+                                    {{ game.price }}€
+                                {% endif %}
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                </th>
-            </tr>
+                    </th>
+                </tr>
 
+            </div>
+        {% endfor %}
+        </table>
         </div>
-    {% endfor %}
-    </table>
-    </div>
-    <!--paginator for site-->
-    
-{% else %}
-    Start searching...
-{% endif %}
-
+        <!--paginator for site-->
+        
+    {% else %}
+        Start searching...
+    {% endif %}
+</div>
 {% endblock content %}

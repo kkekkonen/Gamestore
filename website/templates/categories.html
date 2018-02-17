@@ -1,20 +1,25 @@
 {% extends "base.html" %}
+{% block static-files %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/category.css' %}">
+{% endblock static-files %}
 
 {% block content %}
-<!--left category nav-->
-<div class="collapse navbar-collapse navbar-ex1-collapse">
-	<ul class="nav navbar-nav side-nav">
-		{% for category in categorys_list %}
-			<li>
-				<a href="{% url 'categories_page' %}?cat={{ category.name }}">{{ category.name }}</a>
-			</li>
-		{% endfor %}
-		<li>
-			<a href="{% url 'categories_page' %}">All</a>
-		</li>
-	</ul>
-</div>
+
 <div class="container">
+	<!--Category choices-->
+	<nav class="navbar navbar-expand-lg navbar-light">
+		<ul class="uliuli">
+			{% for n,category in categorychoices %}
+				<li class="nav-item">
+					<a class="navbar-brand" href="{% url 'categories_page' %}?cat={{ category }}">{{ category }}</a>
+				</li>
+			{% endfor %}
+			<li class="nav-item">
+				<a class="navbar-brand" href="{% url 'categories_page' %}">All</a>
+			</li>
+		</ul>
+	</nav>
 	<!-- if request.GET.cat in category -->
 	{% if request.GET.cat|length > 0 %}
 		<h1>Browsing {{ request.GET.cat }}</h1>
@@ -33,8 +38,8 @@
 	        <div class="searchresult">
 	            <tr {% if request.user.is_authenticated %} style="cursor: pointer;" onclick="window.location.href='{{ game.url }}' {% endif %};">
 	            	<!--<th>
-	            		game.image_url }}
-	            	</th>-->
+                         <img src="game.image_url }}">
+                    </th>-->
 	                <th>
 	                    {{ game.name }}
 	                </th>

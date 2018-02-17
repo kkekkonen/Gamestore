@@ -277,22 +277,21 @@ def search(request):
 def categories(request):
     games_list = Game.objects.all()
     chosencategory = request.GET.get("cat")
-    category = Category.objects.all()
+    categorychoices = CATEGORY_CHOICES
     if chosencategory:    
         if len(chosencategory) > 0:
             games_list = games_list.filter(
-                #Q(category__icontains = chosencategory)
+                Q(category__icontains = chosencategory)
                 )
     context = {
         "games_list": games_list,
-        "categorys_list":category,
         "chosencategory": chosencategory,
+        "categorychoices": categorychoices,
     }
-
+    
     if request.user.is_authenticated:
         user_games = get_games(request.user)
         context["user_games"] = user_games
-
     return render(request, 'categories.html', context)
 
 @login_required
