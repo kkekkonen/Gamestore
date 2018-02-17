@@ -15,43 +15,44 @@
 
 
 {% if owned %}
-	<div id="gameWindow" class="col-sm-12" >
-		<h2 class="text-center" >{{game.name}}</h2>
-		<iframe id="iFrameWindow" class="game-window" src="{{game.url}}"></iframe>
-    </div>
-    {% if perms.website.developer_rigths %}
-    <div class="game-statistics">
-        <canvas id="statisticsChart"></canvas>
-    </div>
-    {% endif %}
-    {% if scores %}
-        <h3 class="text-center">TOP SCORE</h3>
-        <div class="col-sm-12 game-top-score">
-            {% for score in scores %}
-                <h2>{{ forloop.counter }}. {{score.score}} points: {{score.user.username}}</h2>
-            {% endfor %}
+    <p id="url" hidden > {{url}}</p>
+    <div class="game-container">
+    	<div id="gameWindow" class="col-sm-12 game-window" >
+    		<h2 class="text-center" >{{game.name}}</h2>
+    		<iframe id="iFrameWindow" class="embed-responsive embed-responsive-4by3 iFrame-window" src="{{game.url}}"></iframe>
         </div>
-    {% endif %}
+        {% if creator %}
+        <div class="game-statistics">
+            <canvas id="statisticsChart"></canvas>
+        </div>
+        {% endif %}
+        {% if scores %}
+            <h3 class="text-center">TOP SCORE</h3>
+            <div class="col-sm-12 game-top-score">
+                {% for score in scores %}
+                    <h2>{{ forloop.counter }}. {{score.score}} points: {{score.user.username}}</h2>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
 {% else %}
 	<div class="game-form game">
-		<h2 class="game-heading">You must buy the game first</h2>
+		<h2 class="game-heading text-center">You must buy the game first</h2>
 		<h4 style="text-align: center">{{game.name}}</h4>
+        <img class="img-fluid rounded" src={{game.image_url}} alt="{{game.description}}">
 		<form action="http://payments.webcourse.niksula.hut.fi/pay/" method="POST">
-	    <input type="hidden" name="pid" value={{ pid }} />
-	    <input type="hidden" name="sid" value={{ sid }} />
+	    <input type="hidden" name="pid" value={{ pid }} >
+	    <input type="hidden" name="sid" value={{ sid }} >
 	    <input type="hidden" name="success_url"
-	            value={{ request.build_absolute_uri }}/buy />
+	            value={{ request.build_absolute_uri }}/buy >
 	    <input type="hidden" name="cancel_url"
-	            value={{ request.build_absolute_uri }}/buy />
+	            value={{ request.build_absolute_uri }}/buy >
 	    <input type="hidden" name="error_url"
-	            value={{ request.build_absolute_uri }}/buy />
+	            value={{ request.build_absolute_uri }}/buy >
 	    <input type="hidden" name="checksum"
 	            value={{ checksum }} />
-		<div class="form-group">
-		    <label for="id_amount">Price</label>
-		    <input type="text" id="id_amount" name="amount" value={{ amount }} class="form-control" />
-		</div>
-	    <button class="btn btn-lg btn-primary btn-block" type="submit">Accept payment</button>
+        <input type="hidden" name="amount" value={{ amount }}>
+	    <button class="btn btn-lg btn-primary btn-block" type="submit">Pay {{game.price|floatformat:2}} €</button>
 		</form>
 	</div>
 {% endif %}

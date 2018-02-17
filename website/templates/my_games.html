@@ -11,14 +11,16 @@
             <div class="col-sm-12 game-area">
                 <h2 class="game-heading">{{game.name}}</h2>
                 {% if game.image_url != "" %}
-                <div class="col-sm-12"><img class="img-fluid rounded" src={{game.image_url}} alt="{{game.description}}"></div>
+                <div class="col-sm-12">
+                    <img class="img-fluid rounded center-block" src={{game.image_url}} alt="{{game.description}}">
+                </div>
                 {% endif %}
-                <div class="col-sm-12 game-buttons">
+                <div class="col-sm-12 game-buttons text-center">
+                    <a class="btn btn-lg btn-info" href="{% url 'game_view' game.id %}">view game</a>
                     {% if game.owner == request.user %}
                     <a class="btn btn-lg btn-info" href="{% url 'edit_game' game.id %}">edit game</a>
-                    <a class="btn btn-lg btn-info" href="{% url 'delete_game' game.id %}">delete game</a>
+                    <a class="btn btn-danger btn-lg" href="{% url 'delete_game' game.id %}">delete game</a>
                     {% endif %}
-                    <a class="btn btn-lg btn-info" href="{% url 'game_view' game.id %}">view game</a>
                 </div>
             </div>
         </div>

@@ -29,6 +29,10 @@ from django.core.mail import EmailMessage
 #email verification imports end
 import os
 from urllib.request import urlopen
+from collections import Counter
+
+SELLER_ID = 'IHaveSpentTooMuchTimeOnThisIDWSD20172018'
+PAYMENT_SECRET_KEY = 'aa3dfa29c26efc70b4795f4cfb078f20'
 
 def give_dev_rights(user):
     #this function is used to give a user the developer-permission
@@ -152,7 +156,10 @@ def signup(request):
         return render(request, 'registration/signup.html', {'form': form})
 
 def home(request):
-    return render(request, 'home.html')
+    #the function for home view. Gets the 5 most sold games of all time and lists them
+    games = Counter((list(map(lambda x: x.game, Purchase.objects.all()))))
+    popular_games= [game for game, game_count in Counter(games).most_common(3)]
+    return render(request, 'home.html', {"games": popular_games})
 
 def check_image_url(url):
     #this function is used to check if a url can be used to load a image
@@ -182,6 +189,7 @@ def add_game(request):
         form = GameForm(data)
         if image_url != "" and not check_image_url(image_url):
             form.add_error("image_url", "invalid image url")
+            form['image_url'].widget.attrs['class'] = "form-control error"
         if form.is_valid():
             game_data = {
                 'name': form.cleaned_data['name'],
@@ -218,6 +226,10 @@ def game_view(request, game_id, display=False, message="", color=""):
     game = get_object_or_404(Game, pk=game_id)
     user_games = get_games(request.user)
     context = {}
+    if "DYNO" in os.environ:
+        context["url"] = get_current_site(request).domain + "/games/" + str(game_id)
+    else:
+        context["url"] = "http://localhost:8000/games/" + str(game_id)
     context["game"] = game
     context["display"] = display
     context["result_message"] = message
@@ -227,8 +239,10 @@ def game_view(request, game_id, display=False, message="", color=""):
         context["creator"] = True
     if game not in user_games and game.owner != request.user:
         pid = "game" + str(game_id) + request.user.username
-        sid = "IHaveSpentTooMuchTimeOnThisIDWSD20172018"
-        secret_key = "aa3dfa29c26efc70b4795f4cfb078f20"
+        sid = SELLER_ID
+        secret_key = PAYMENT_SECRET_KEY
+        print(sid)
+        print(secret_key)
         checksum = make_checksum(pid, sid, game.price, secret_key)
         context["amount"] = game.price
         context["owned"] = False
@@ -260,7 +274,7 @@ def game_buy(request, game_id):
         ref = request.GET.get("ref", "")
         result = request.GET.get("result", "")
         checksum = request.GET.get("checksum", "")
-        checksumstr = "pid={}&ref={}&result={}&token={}".format(pid, ref, result, "aa3dfa29c26efc70b4795f4cfb078f20")
+        checksumstr = "pid={}&ref={}&result={}&token={}".format(pid_test, ref, result, PAYMENT_SECRET_KEY)
         checksum_test = md5(checksumstr.encode("ascii")).hexdigest()
         if result == "success" and checksum == checksum_test and pid == pid_test:
             game = get_object_or_404(Game, pk=game_id)
@@ -268,8 +282,8 @@ def game_buy(request, game_id):
                 Purchase.objects.create(game=game, user=request.user, timestamp=datetime.now())
             else:
                 #you already have the game
-                raise Http404("you already own the game")
-            return redirect('game_view', game_id=game_id)
+                return redirect('game_view', game_id=game_id)
+            return game_view(request, game_id, True, "Purchase successfull", "success")
         elif result == "cancel" and checksum == checksum_test and pid == pid_test:
             return game_view(request, game_id, True, "Purchase canceled", "warning")
         elif result == "error":
@@ -297,11 +311,11 @@ def save_score(request, game, score):
 def load_gameState(request, game):
     #this function tries to load the gamestate the user has previously saved. Used in function game_request below
     try:
-        gamestate = GameState.objects.get(game=game, user=request.user).gamestate
-        data["messageType"] = "LOAD"
+        gamestate = eval(GameState.objects.get(game=game, user=request.user).gamestate)
+        gamestate["messageType"] = "LOAD"
     except GameState.DoesNotExist:
         return  {"messageType": "ERROR", "info": "Gamestate could not be loaded, you don't have any saves for this game!"}
-    return json.loads(gamestate)
+    return gamestate
 
 @login_required
 def save_gameState(request, game, json_string):
@@ -315,7 +329,6 @@ def save_gameState(request, game, json_string):
     except GameState.DoesNotExist:
         pass
     GameState.objects.create(game=game, user=request.user, gamestate=json_string)
-    return HttpResponse(status=204)
 
 
 @login_required
@@ -328,6 +341,7 @@ def game_request(request, game_id):
         messageType = json.loads(json_string).get('messageType')
         if messageType == "SAVE":
             save_gameState(request, game, json_string)
+            return HttpResponse(status=204)
         elif messageType == "SCORE":
             save_score(request, game, json.loads(json_string).get("score"))
             return HttpResponse(status=204)
@@ -373,7 +387,7 @@ def edit_game(request, game_id):
     raise Http404("invalid game edit request")
 
 @login_required
-@permission_required('website.developer_rigths')
+@permission_required('website.developer_rights')
 def game_stats(request, game_id):
     #this function is used to create a json used to display selling data of a game
     game = get_object_or_404(Game, pk=game_id)

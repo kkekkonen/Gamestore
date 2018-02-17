@@ -11,9 +11,9 @@ class GameForm(forms.Form):
     error_messages={'required': 'Your game needs a name!'})
     url = forms.URLField(label = 'Url', max_length=255, required=True,
     error_messages={'required': 'Your game needs a URL!'})
-    image_url = forms.URLField(label = 'Image Url', max_length=255, required=False)
-    description = forms.CharField(label = 'Description', required=True,
-    error_messages={'required': 'Your game needs a description for some reason!'})
+    image_url = forms.URLField(label = 'Image Url', max_length=1000, required=False)
+    description = forms.CharField(widget=forms.Textarea, max_length=1000, label = 'Description', required=True,
+    error_messages={'required': 'Your game needs a description!'})
     price = forms.FloatField(label = 'Price', required = True,
     error_messages={'required': 'Your game needs a price!', 'min_value':'your game cannot cost less than 0!', 'max_value': 'your game cannot cost more than 10000!'}, min_value = 0.0, max_value = 10000.0)
 
@@ -26,29 +26,6 @@ class GameForm(forms.Form):
                 if f_name in self.errors:
                     self.fields[f_name].widget.attrs['class'] = "form-control error"
 
-"""
-# WORK IN PROGRESS
-class Verification(models.Model):
-    belongs_to = models.ForeignKey(User, on_delete=models.CASCADE)
-    code = models.CharField(max_length=6)
-
-    def generate_code(self):
-        return ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
-
-    def send_code(self):
-        connection = mail.get_connection()
-        link = reverse('verify_email')
-        to_be_sent = mail.EmailMessage(
-            'Your verification code',
-            'Please visit this link: ' + link,
-            'admin@gamestore.com',
-            [''],
-            connection=connection
-        )
-
-    def save(self):
-        pass
-"""
 
 class SignupForm(UserCreationForm):
     email = forms.EmailField(label='Email', required=True)
