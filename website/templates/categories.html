@@ -29,19 +29,19 @@
 	<!--Result content-->
 	<table class="table">
 	    <thead class="thead-inverse">
-	    	<th>Image</th>
+	    	<th></th>
 	        <th>Game</th>
 	        <th>Description</th>
 	        <th>Price</th>
 	    </thead>
 		{% for game in games_list %}
 	        <div class="searchresult">
-	            <tr {% if request.user.is_authenticated %} style="cursor: pointer;" onclick="window.location.href='{{ game.url }}' {% endif %};">
+	            <tr>
 	            	<th>
                          <img src="{{ game.image_url }}">
                     </th>
 	                <th>
-	                    {{ game.name }}
+	                    <a class="link" href="{% url 'game_view' game.id %}">{{ game.name }}</a>
 	                </th>
 	                <th>
 	                    {{ game.description|truncatechars:100 }}
@@ -70,7 +70,6 @@
 	        </div>
 		{% endfor %}
 	</table>
-	<!--paginator for site-->
 </div>
 
 {% endblock content %}

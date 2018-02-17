@@ -15,7 +15,7 @@
         <H2>Results:</H2>
         <table class="table">
             <thead class="thead-inverse">
-                <th>Picture</th>
+                <th></th>
                 <th>Game</th>
                 <th>Description</th>
                 <th>Category</th>
@@ -23,12 +23,12 @@
             </thead>
         {% for game in games_list %}
             <div class="searchresult">
-                <tr {% if request.user.is_authenticated %} style="cursor: pointer;" onclick="window.location.href='{{ game.url }}' {% endif %};">
+                <tr>
                     <th>
                          <img src="{{ game.image_url }}">
                     </th>
                     <th>
-                        {{ game.name }}
+                        <a class="link" href="{% url 'game_view' game.id %}">{{ game.name }}</a>
                     </th>
                     <th>
                         {{ game.description|truncatechars:100 }}
@@ -61,9 +61,7 @@
             </div>
         {% endfor %}
         </table>
-        </div>
-        <!--paginator for site-->
-        
+        </div>        
     {% else %}
         Start searching...
     {% endif %}
