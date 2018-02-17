@@ -226,10 +226,7 @@ def game_view(request, game_id, display=False, message="", color=""):
     game = get_object_or_404(Game, pk=game_id)
     user_games = get_games(request.user)
     context = {}
-    if "DYNO" in os.environ:
-        context["url"] = get_current_site(request).domain + "/games/" + str(game_id)
-    else:
-        context["url"] = "http://localhost:8000/games/" + str(game_id)
+    context["url"] = get_current_site(request).domain + "/games/" + str(game_id)
     context["game"] = game
     context["display"] = display
     context["result_message"] = message

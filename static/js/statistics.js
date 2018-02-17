@@ -1,7 +1,8 @@
 window.onload = function() {
+    url = "http://" + document.getElementById("url").textContent.trim() + "/statistics";
     $.ajax({
         type: "GET",
-        url: document.getElementById("url").textContent + "/statistics",
+        url: url,
         success: function(response) {
             var labels = [];
             var values = [];
