@@ -29,7 +29,7 @@
 	<!--Result content-->
 	<table class="table">
 	    <thead class="thead-inverse">
-	    	<!--<th>Image</th>-->
+	    	<th>Image</th>
 	        <th>Game</th>
 	        <th>Description</th>
 	        <th>Price</th>
@@ -37,9 +37,9 @@
 		{% for game in games_list %}
 	        <div class="searchresult">
 	            <tr {% if request.user.is_authenticated %} style="cursor: pointer;" onclick="window.location.href='{{ game.url }}' {% endif %};">
-	            	<!--<th>
-                         <img src="game.image_url }}">
-                    </th>-->
+	            	<th>
+                         <img src="{{ game.image_url }}">
+                    </th>
 	                <th>
 	                    {{ game.name }}
 	                </th>
