@@ -1,10 +1,11 @@
-.game-container {
+.game-container, img {
     max-width: 700px !important;
     margin-left: auto;
     margin-right: auto;
-    margin-bottom: 100px;
     display: block;
 }
+.game-container {margin-bottom: 100px;}
+
 .game-statistics, .game-top-score, .game-window, .game-label{
     max-width: 700px !important;
     margin-left: auto;

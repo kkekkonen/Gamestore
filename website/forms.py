@@ -11,9 +11,9 @@ class GameForm(forms.Form):
     error_messages={'required': 'Your game needs a name!'})
     url = forms.URLField(label = 'Url', max_length=255, required=True,
     error_messages={'required': 'Your game needs a URL!'})
-    image_url = forms.URLField(label = 'Image Url', max_length=255, required=False)
-    description = forms.CharField(label = 'Description', required=True,
-    error_messages={'required': 'Your game needs a description for some reason!'})
+    image_url = forms.URLField(label = 'Image Url', max_length=1000, required=False)
+    description = forms.CharField(widget=forms.Textarea, max_length=1000, label = 'Description', required=True,
+    error_messages={'required': 'Your game needs a description!'})
     price = forms.FloatField(label = 'Price', required = True,
     error_messages={'required': 'Your game needs a price!', 'min_value':'your game cannot cost less than 0!', 'max_value': 'your game cannot cost more than 10000!'}, min_value = 0.0, max_value = 10000.0)
 

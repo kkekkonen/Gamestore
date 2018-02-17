@@ -29,6 +29,10 @@ from django.core.mail import EmailMessage
 #email verification imports end
 import os
 from urllib.request import urlopen
+from collections import Counter
+
+SELLER_ID = 'IHaveSpentTooMuchTimeOnThisIDWSD20172018'
+PAYMENT_SECRET_KEY = 'aa3dfa29c26efc70b4795f4cfb078f20'
 
 def give_dev_rights(user):
     #this function is used to give a user the developer-permission
@@ -147,7 +151,10 @@ def signup(request):
         return render(request, 'registration/signup.html', {'form': form})
 
 def home(request):
-    return render(request, 'home.html')
+    #the function for home view. Gets the 5 most sold games of all time and lists them
+    games = Counter((list(map(lambda x: x.game, Purchase.objects.all()))))
+    popular_games= [game for game, game_count in Counter(games).most_common(3)]
+    return render(request, 'home.html', {"games": popular_games})
 
 def check_image_url(url):
     #this function is used to check if a url can be used to load a image
@@ -177,6 +184,7 @@ def add_game(request):
         form = GameForm(data)
         if image_url != "" and not check_image_url(image_url):
             form.add_error("image_url", "invalid image url")
+            form['image_url'].widget.attrs['class'] = "form-control error"
         if form.is_valid():
             game_data = {
                 'name': form.cleaned_data['name'],
@@ -226,8 +234,10 @@ def game_view(request, game_id, display=False, message="", color=""):
         context["creator"] = True
     if game not in user_games and game.owner != request.user:
         pid = "game" + str(game_id) + request.user.username
-        sid = "IHaveSpentTooMuchTimeOnThisIDWSD20172018"
-        secret_key = "aa3dfa29c26efc70b4795f4cfb078f20"
+        sid = SELLER_ID
+        secret_key = PAYMENT_SECRET_KEY
+        print(sid)
+        print(secret_key)
         checksum = make_checksum(pid, sid, game.price, secret_key)
         context["amount"] = game.price
         context["owned"] = False
@@ -259,7 +269,7 @@ def game_buy(request, game_id):
         ref = request.GET.get("ref", "")
         result = request.GET.get("result", "")
         checksum = request.GET.get("checksum", "")
-        checksumstr = "pid={}&ref={}&result={}&token={}".format(pid, ref, result, "aa3dfa29c26efc70b4795f4cfb078f20")
+        checksumstr = "pid={}&ref={}&result={}&token={}".format(pid_test, ref, result, PAYMENT_SECRET_KEY)
         checksum_test = md5(checksumstr.encode("ascii")).hexdigest()
         if result == "success" and checksum == checksum_test and pid == pid_test:
             game = get_object_or_404(Game, pk=game_id)

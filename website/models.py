@@ -18,7 +18,7 @@ class Game(models.Model):
     name = models.CharField(max_length=255)
     url = models.URLField(blank=False)
     image_url = models.URLField()
-    description = models.CharField(max_length=255)
+    description = models.TextField()
     price = models.FloatField()
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     def __str__(self):
