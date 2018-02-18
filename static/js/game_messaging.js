@@ -31,7 +31,7 @@ $(document).ready(function () {
 		if(evt.data.messageType === "SAVE" || evt.data.messageType === "SCORE") {
 			$.ajax({
 				type: "POST",
-				url: document.getElementById("url").textContent + "/request",
+				url: "http://" + document.getElementById("url").textContent + "/request",
 				contentType: 'application/json; charset=utf-8',
 				processData: false,
 				data: JSON.stringify(evt.data),
@@ -40,7 +40,7 @@ $(document).ready(function () {
 		} else if(evt.data.messageType === "LOAD_REQUEST") {
 			$.ajax({
 				type: "GET",
-				url: document.getElementById("url").textContent + "/request",
+				url: "http://" + document.getElementById("url").textContent + "/request",
 				data: evt.data,
 				datatype: "json",
 				success: function(response) {
