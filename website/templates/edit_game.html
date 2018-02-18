@@ -13,7 +13,7 @@
                 {% csrf_token %}
                 <h2 class="form-game-heading">Edit {{game.name}}</h2>
                 {% if game.image_url != "" %}
-                <div class="col-sm-12"><img class="img-fluid rounded" src={{game.image_url}} alt="image failed to load. Not all domains allow linking images"></div>
+                <div class="col-sm-12"><img class="img-fluid rounded" src={{game.image_url}} alt="Your image does not work"></div>
                 {% endif %}
                 <div class="col-sm-12">
                     {% for field in form %}

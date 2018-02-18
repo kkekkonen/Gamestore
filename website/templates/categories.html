@@ -29,45 +29,47 @@
 	<!--Result content-->
 	<table class="table">
 	    <thead class="thead-inverse">
-	    	<th></th>
-	        <th>Game</th>
-	        <th>Description</th>
-	        <th>Price</th>
+            <tr>
+            	<th></th>
+                <th>Game</th>
+                <th>Description</th>
+                <th>Price</th>
+            </tr>
 	    </thead>
 		{% for game in games_list %}
-	        <div class="searchresult">
-	            <tr>
-	            	<th>
-                         <img src="{{ game.image_url }}">
-                    </th>
-	                <th>
-	                    <a class="link" href="{% url 'game_view' game.id %}">{{ game.name }}</a>
-	                </th>
-	                <th>
-	                    {{ game.description|truncatechars:100 }}
-	                </th>
-	                <th>
-	                    <!--Price or owned-->
-	                    {% if request.user.is_not_authenticated %}
-	                        {% if game.price == 0 %}
-	                            Free
-	                        {% else %}
-	                            {{ game.price }}€
-	                        {% endif %}
-	                    {%else%}
-	                        {% if game in user_games or game.owner == user %}
-	                            owned
-	                        {% else %}
-	                            {% if game.price == 0 %}
-	                                Free
-	                            {% else %}
-	                                {{ game.price }}€
-	                            {% endif %}
-	                        {% endif %}
-	                    {% endif %}
-	                </th>
-	            </tr>
-	        </div>
+        <tbody class="searchresult">
+            <tr>
+            	<th>
+                     <img class="img-fluid rounded" alt="" src="{{ game.image_url }}">
+                </th>
+                <th>
+                    <a class="link" href="{% url 'game_view' game.id %}">{{ game.name }}</a>
+                </th>
+                <th>
+                    {{ game.description|truncatechars:100 }}
+                </th>
+                <th>
+                    <!--Price or owned-->
+                    {% if request.user.is_not_authenticated %}
+                        {% if game.price == 0 %}
+                            Free
+                        {% else %}
+                            {{ game.price }}€
+                        {% endif %}
+                    {%else%}
+                        {% if game in user_games or game.owner == user %}
+                            owned
+                        {% else %}
+                            {% if game.price == 0 %}
+                                Free
+                            {% else %}
+                                {{ game.price }}€
+                            {% endif %}
+                        {% endif %}
+                    {% endif %}
+                </th>
+            </tr>
+        </tbody>
 		{% endfor %}
 	</table>
 </div>
