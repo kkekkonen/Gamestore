@@ -16,6 +16,8 @@ class GameForm(forms.Form):
     error_messages={'required': 'Your game needs a description!'})
     price = forms.FloatField(label = 'Price', required = True,
     error_messages={'required': 'Your game needs a price!', 'min_value':'your game cannot cost less than 0!', 'max_value': 'your game cannot cost more than 10000!'}, min_value = 0.0, max_value = 10000.0)
+    category = forms.ChoiceField(label = 'Category', required=True, widget=forms.Select(), choices=CATEGORY_CHOICES,
+    error_messages={'required': 'Your game needs a category!',})
 
     def __init__(self, *args, **kwargs):
         super(GameForm, self).__init__(*args, **kwargs)

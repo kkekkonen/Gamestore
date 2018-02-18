@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block static-files %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/search.css' %}">
+{% endblock static-files %}
+
+{% block content %}
+<div class="container">
+        <H2>Results:</H2>
+        <table class="table">
+            <thead class="thead-inverse">
+                <th></th>
+                <th>Game</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Price</th>
+            </thead>
+        {% for game in games_list %}
+            <div class="searchresult">
+                <tr>
+                    <th>
+                         <img class="img-fluid rounded" src="{{ game.image_url }}">
+                    </th>
+                    <th>
+                        <a class="link" href="{% url 'game_view' game.id %}">{{ game.name }}</a>
+                    </th>
+                    <th>
+                        {{ game.description|truncatechars:100 }}
+                    </th>
+                    <th>
+                        {{ game.category }}
+                    </th>
+                    <th>
+                        <!--Price or owned-->
+                        {% if request.user.is_not_authenticated %}
+                            {% if game.price == 0 %}
+                                Free
+                            {% else %}
+                                {{ game.price }}€
+                            {% endif %}
+                        {%else%}
+                            {% if game in user_games or game.owner == user %}
+                                owned
+                            {% else %}
+                                {% if game.price == 0 %}
+                                    Free
+                                {% else %}
+                                    {{ game.price }}€
+                                {% endif %}
+                            {% endif %}
+                        {% endif %}
+                    </th>
+                </tr>
+
+            </div>
+        {% endfor %}
+        </table>
+        </div>
+
+</div>
+{% endblock content %}

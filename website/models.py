@@ -14,6 +14,14 @@ class RightsSupport(models.Model):
             ('developer_rights', 'developers can add games'),
         )
 
+CATEGORY_CHOICES = (
+    ('Action', 'Action'),
+    ('Arcade', 'Arcade'),
+    ('Indie', 'Indie'),
+    ('Puzzle', 'Puzzle'),
+    ('Strategy', 'Strategy'),
+)
+
 class Game(models.Model):
     name = models.CharField(max_length=255)
     url = models.URLField(blank=False)
@@ -21,6 +29,8 @@ class Game(models.Model):
     description = models.TextField(default="")
     price = models.FloatField(default=0)
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
+    category = models.CharField(max_length = 100, choices = CATEGORY_CHOICES, default = 'a')
+
     def __str__(self):
         return self.name
 

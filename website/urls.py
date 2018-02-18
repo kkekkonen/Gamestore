@@ -37,5 +37,7 @@ urlpatterns = [
     path('account/edit_game/<int:game_id>', views.edit_game, name='edit_game'),
     path('account/delete_game/<int:game_id>', views.delete_game, name='delete_game'),
     path('account/my_games', views.my_games, name='my_games'),
+    path('search/',views.search, name="search_page"),
+    path('categories/',views.categories, name="categories_page"),
     path('games/<int:game_id>/statistics', views.game_stats, name='game_stats'),
 ]

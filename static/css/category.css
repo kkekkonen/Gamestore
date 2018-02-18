@@ -1,0 +1,28 @@
+.uliuli {
+	list-style-type: none;
+	margin: 0 ;
+	padding: 0;
+}
+
+.nav-item {
+	display: inline;
+}
+
+a, a:visited, a:hover {
+	color: black;
+	text-decoration: none;
+}
+
+.container, .table {
+    max-width: 700px !important;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+img {
+	max-width: 300px !important;
+}
+
+.btn {
+	margin: 1px;
+}

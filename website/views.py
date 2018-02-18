@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import permission_required
 from django.urls import reverse
 from django.forms.utils import ErrorList
 from django.db import models
+from django.db.models import Q
 from django.contrib.auth.models import Permission
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, Http404, HttpResponseRedirect
@@ -12,6 +13,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from website.models import *
 from website.forms import *
 from hashlib import md5
@@ -181,7 +183,8 @@ def add_game(request):
         image_url = request.POST.get('image_url')
         description = request.POST.get('description')
         price = request.POST.get('price')
-        data = {"name":name, "url":url, "image_url":image_url, "description":description, "price":price}
+        category = request.POST.get('category')
+        data = {"name":name, "url":url, "image_url":image_url, "description":description, "price":price, "category":category}
         form = GameForm(data)
         if image_url != "" and not check_image_url(image_url):
             form.add_error("image_url", "invalid image url")
@@ -193,6 +196,7 @@ def add_game(request):
                 'image_url': form.cleaned_data['image_url'],
                 'description': form.cleaned_data['description'],
                 'price':form.cleaned_data['price'],
+                "category":form.cleaned_data['category'],
                 'owner':request.user,
             }
             game = Game(**game_data)
@@ -344,6 +348,64 @@ def game_request(request, game_id):
             return HttpResponse(json.dumps(data), content_type='application/json')
     raise Http404("invalid game request")
 
+def search(request):
+    searchgame_list = Game.objects.all()
+    searchtext = request.GET.get("q")
+
+    if searchtext:
+        searchgame_list = searchgame_list.filter(
+            Q(name__icontains = searchtext)
+            )
+
+    context = {
+        "games_list": searchgame_list,
+    }
+
+    if request.user.is_authenticated:
+        user_games = get_games(request.user)
+        context["user_games"] = user_games
+    context["search"] = searchtext
+    return render(request, 'search.html', context)
+
+def categories(request):
+    games_list = Game.objects.all()
+    chosencategory = request.GET.get("cat")
+    categorychoices = CATEGORY_CHOICES
+    if chosencategory:
+        if len(chosencategory) > 0:
+            games_list = games_list.filter(
+                Q(category__icontains = chosencategory)
+                )
+    context = {
+        "games_list": games_list,
+        "chosencategory": chosencategory,
+        "categorychoices": categorychoices,
+    }
+
+    if request.user.is_authenticated:
+        user_games = get_games(request.user)
+        context["user_games"] = user_games
+    return render(request, 'categories.html', context)
+
+@login_required
+@permission_required('website.developer_rigths')
+def dev_games(request, display=False, message="", color=""):
+    #function collects the games the user-developer has made to populate the dev_edit templates edit-forms
+    games = Game.objects.filter(owner=request.user).all()
+    context = {}
+    context["display"] = display
+    context["result_message"] = message
+    context["color"] = color
+    context["games"] = games
+    return render(request, 'dev_edit.html', context)
+
+def is_int(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
 @login_required
 @permission_required('website.developer_rights')
 def edit_game(request, game_id):
@@ -358,7 +420,8 @@ def edit_game(request, game_id):
             description = request.POST.get("description")
             price = request.POST.get("price")
             image_url = request.POST.get("image_url")
-            data = {"name":name, "url":url, "image_url":image_url, "description":description, "price":price}
+            category = request.POST.get('category')
+            data = {"name":name, "url":url, "image_url":image_url, "description":description, "price":price, "category":category}
             form = GameForm(data)
             if image_url != "" and not check_image_url(image_url):
                 form.add_error("image_url", "invalid image url")
@@ -368,11 +431,12 @@ def edit_game(request, game_id):
                 game.image_url = form.cleaned_data['image_url']
                 game.description = form.cleaned_data['description']
                 game.price = form.cleaned_data['price']
+                game.category = form.cleaned_data['category']
                 game.save()
             return render(request, 'edit_game.html', {"form": form, "game": game} )
         else:
             #if the user did not post the form, send form with the current values of the Game
-            data = {"name":game.name, "url":game.url, "description":game.description, "price":game.price, "image_url":game.image_url}
+            data = {"name":game.name, "url":game.url, "description":game.description, "price":game.price, "image_url":game.image_url, "category":game.category}
             form = GameForm(initial=data)
             return render(request, 'edit_game.html', {"form": form, "game": game} )
     raise Http404("invalid game edit request")
