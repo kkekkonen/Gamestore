@@ -17,10 +17,10 @@
                 <th>Price</th>
             </thead>
         {% for game in games_list %}
-            <div class="searchresult">
+            <tbody class="searchresult">
                 <tr>
                     <th>
-                         <img class="img-fluid rounded" src="{{ game.image_url }}">
+                         <img class="img-fluid rounded" src="{{ game.image_url }}" alt="">
                     </th>
                     <th>
                         <a class="link" href="{% url 'game_view' game.id %}">{{ game.name }}</a>
@@ -52,8 +52,7 @@
                         {% endif %}
                     </th>
                 </tr>
-
-            </div>
+            </tbody>
         {% endfor %}
         </table>
         </div>
