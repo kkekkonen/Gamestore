@@ -139,16 +139,12 @@ def signup(request):
             #if the user checked the developer checkbox, grant him dev permission
             if(request.POST.get('developer') == 'on'):
                 give_dev_rights(user)
-            #when running on heroku, render a simple template to activate account
-            if "DYNO" in os.environ:
-                context = {}
-                context['token'] = account_activation_token.make_token(user)
-                context['uid'] = user.id
-                context['domain'] = get_current_site(request).domain
-                context['username'] = username
-                return render(request, 'activation_email.html', context)
-            context = {'result_message': 'Confirm your email!', 'color': 'success', 'display': True}
-            return render(request, 'homepage.html', context)
+            context = {}
+            context['token'] = account_activation_token.make_token(user)
+            context['uid'] = urlsafe_base64_encode(force_bytes(user.id)).decode()
+            context['domain'] = get_current_site(request).domain
+            context['username'] = username
+            return render(request, 'activation_email.html', context)
         else:
             return render(request, 'registration/signup.html', {'form': form})
     else:
@@ -238,8 +234,6 @@ def game_view(request, game_id, display=False, message="", color=""):
         pid = "game" + str(game_id) + request.user.username
         sid = SELLER_ID
         secret_key = PAYMENT_SECRET_KEY
-        print(sid)
-        print(secret_key)
         checksum = make_checksum(pid, sid, game.price, secret_key)
         context["amount"] = game.price
         context["owned"] = False
