@@ -35,7 +35,7 @@ def user_games(request):
 def highscores(request):
     #makes a json with a list of all the high scores stored in the database
     if request.method == 'GET':
-        data = serializers.serialize('python', Score.objects.all(), fields=('game', 'user', 'score'))
+        data = serializers.serialize('python', Score.objects.all(), fields=('game', 'user', 'score'), use_natural_foreign_keys=True)
         all_scores = [d['fields'] for d in data]
         return JsonResponse(all_scores, safe=False)
     else:
@@ -48,7 +48,7 @@ def all_sales(request):
     #makes a json with a list of all the purchase events of the request sender
     if request.method == 'GET':
         your_games = Game.objects.filter(owner=request.user).all()
-        data = serializers.serialize('python', Purchase.objects.filter(game__in=your_games).all(), fields=('game', 'user', 'timestamp'))
+        data = serializers.serialize('python', Purchase.objects.filter(game__in=your_games).all(), fields=('game', 'timestamp'), use_natural_foreign_keys=True)
         all_sales = [d['fields'] for d in data]
         return JsonResponse(all_sales, safe=False)
     else:

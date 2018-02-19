@@ -31,6 +31,9 @@ class Game(models.Model):
     owner = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.CharField(max_length = 100, choices = CATEGORY_CHOICES, default = 'a')
 
+    def natural_key(self):
+        return (self.name)
+
     def __str__(self):
         return self.name
 
