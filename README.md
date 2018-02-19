@@ -117,7 +117,7 @@ The service was designed to be usable with both traditional computers and smartp
 ### 2.5 Instructions ###
 
 the site is hosted at http://protected-anchorage-48125.herokuapp.com.
-Users should first sign up as either regular user or developer using signup form at. If the user has a google account, it can be used to login without creating a separate account. A player can later request developer rights at profile settings. Only pages accessible without authentication are login, signup, home and some rest urls.
+Users should first sign up as either regular user or developer using signup form at. After creating the account, the user must activate the account using the activation link. The activation link is rendered to the user, and it must be used or it will be lost forever. If the service is running locally the link is also printed on the console using django's console emailbackend. If the user has a google account, it can be used to login without creating a separate account. A player can later request developer rights at profile settings. Only pages accessible without authentication are login, signup, home and some rest urls.
 
 After authenticating the user is redirected to homepage where he can see the 3 best selling games. from the navigation bar it is possible no navigate to game categories, owned games or account setting, or search the games. If the user is developer, he can add games as well as edit his/hers existing games at "my games".
 
