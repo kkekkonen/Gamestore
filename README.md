@@ -137,15 +137,15 @@ Minimum functional requirements, RESTful API, Quality of Work-User experience, M
 Basic player functionalities-categories/search, Quality of Work-User experience
 
 #### Points per feature ####
-Authentication-200p
-Basic player functionalities-300p
-Basic developer functionalities-200p
-Game/service interaction-200p
-Quality of Work-75p
-Non-functional requirements-200p
-Save/load and resolution feature-100p
-3rd party login-100p
-RESTful API-100p
-Mobile Friendly-50p
+Authentication-200p  
+Basic player functionalities-300p  
+Basic developer functionalities-200p  
+Game/service interaction-200p  
+Quality of Work-75p  
+Non-functional requirements-200p  
+Save/load and resolution feature-100p  
+3rd party login-100p  
+RESTful API-100p  
+Mobile Friendly-50p  
 
-TOTAL:1525p
+TOTAL:1525p  
