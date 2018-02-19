@@ -362,7 +362,6 @@ def search(request):
     if request.user.is_authenticated:
         user_games = get_games(request.user)
         context["user_games"] = user_games
-    context["search"] = searchtext
     return render(request, 'search.html', context)
 
 def categories(request):

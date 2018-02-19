@@ -149,5 +149,5 @@ if "DYNO" in os.environ:
     import dj_database_url
     DATABASES['default'] =  dj_database_url.config()
 
-    DEBUG = True # False, once service is succesfully deployed
+    DEBUG = False
     ALLOWED_HOSTS = ['*']
