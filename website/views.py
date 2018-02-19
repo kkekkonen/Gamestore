@@ -193,7 +193,7 @@ def add_game(request):
                 'url': form.cleaned_data['url'],
                 'image_url': form.cleaned_data['image_url'],
                 'description': form.cleaned_data['description'],
-                'price':form.cleaned_data['price'],
+                'price':round(float(form.cleaned_data['price']), 2),
                 "category":form.cleaned_data['category'],
                 'owner':request.user,
             }
@@ -232,7 +232,7 @@ def game_view(request, game_id, display=False, message="", color=""):
     context["creator"] = False
     if request.user == game.owner:
         context["creator"] = True
-    if game not in user_games and game.owner != request.user:
+    if game not in user_games and game.owner != request.user and game.price > 0:
         pid = "game" + str(game_id) + request.user.username
         sid = SELLER_ID
         secret_key = PAYMENT_SECRET_KEY
@@ -427,7 +427,7 @@ def edit_game(request, game_id):
                 game.url = form.cleaned_data['url']
                 game.image_url = form.cleaned_data['image_url']
                 game.description = form.cleaned_data['description']
-                game.price = form.cleaned_data['price']
+                game.price = round(float(form.cleaned_data['price']), 2)
                 game.category = form.cleaned_data['category']
                 game.save()
             return render(request, 'edit_game.html', {"form": form, "game": game} )

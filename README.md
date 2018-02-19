@@ -55,7 +55,7 @@ Perceived problems will be addressed as soon as possible. If development is slow
 
 # 2. Documentation #
 
-### 2.2 Description ###
+### 2.1 Description ###
 This is a online gamestore made for the Aalto Web Software Developement course using Django framework.
 
 The website's users are divided into players and developers. A player can browse and purchase games, and view his game inventory. A developer has the same (kyvyt) as the player, but he can also add
@@ -65,7 +65,7 @@ The website is deployed on heroku at <http://protected-anchorage-48125.herokuapp
 
 Tools used: HTML5, CSS (+Bootstrap), JS (+Jquery, Chart.js), Django Framework (+Python 3.6)
 
-### 2.3 Project requirements ###
+### 2.2 Project requirements ###
 
 #### Minimum requirements ####
 
@@ -89,12 +89,14 @@ Developers can add/modify/delete games they own. Developers can also see sales s
 The service supports the course project message protocol. Users can save their high score, if the game supports such feature. More about game/service interaction on 2.4 Save/load feature.
 
 #### Quality of Work ####
-in progress
 
-testing:
-css and js files have been validated using W3C Validation service and JSlint. The website has also been manually tested.
+html, css and js files have been validated using W3C Validation service and JSlint. The website has also rigorious manual tests.
 
-### 2.4 Additional Features ###
+A large emphasis has been placed to site security. Django requires a csrf token for all POST messages, including those used in game messaging.
+
+Unfortunately our site is not very modular, as we chose to not split each feature in a separate app.
+
+### 2.3 Additional Features ###
 
 #### Save/load and resolution feature ####
 
@@ -106,8 +108,44 @@ Users can log in using Google accounts. The service uses Python Social Auth app.
 
 #### RESTful API ####
 
-in progress
+A simple RESTful api was implemented, which supports available games, high scores and sales for game developers.
 
 #### Mobile Friendly ####
 
-The service was designed to be usable with both traditional computers and smartphones. Tests were done with 1080p screen computers and 4inch smartphones
+The service was designed to be usable with both traditional computers and smartphones. Tests were done with 1080p screen computers and 4inch smartphones. This mobile friendliness was achieved mostly with the use of Bootstrap.
+
+### 2.5 Instructions ###
+
+the site is hosted at http://protected-anchorage-48125.herokuapp.com.
+Users should first sign up as either regular user or developer using signup form at. If the user has a google account, it can be used to login without creating a separate account. A player can later request developer rights at profile settings. Only pages accessible without authentication are login, signup, home and some rest urls.
+
+After authenticating the user is redirected to homepage where he can see the 3 best selling games. from the navigation bar it is possible no navigate to game categories, owned games or account setting, or search the games. If the user is developer, he can add games as well as edit his/hers existing games at "my games".
+
+Adding and editing games is done using a form. The form requires a name, url, description, price and category. A image can also be added for the game, but this field is optional. The game price is rounded to 2 decimals.
+
+RESTful api has several functions. 'rest/games' lists all games as a json. 'rest/highscores' lists all scores for all games, and 'rest/sales' lists all the sales of the request sender, if he has developer permissions. 'rest/mygames' lists all the games which are owned by the request sender.
+
+### 2.6 Team workload and points ###
+
+#### Kaarlo Kekkonen ####
+Minimum functional requirements, Authentication, Basic player functionalities-payment/play , Basic developer functionalities, Game/service interaction, Save/load and resolution feature, 3rd party login, Mobile Friendly, Non-functional requirements-documentation, Quality of Work-testing/quality of code
+
+#### Nikolas Erkinheimo ####
+Minimum functional requirements, RESTful API, Quality of Work-User experience, Mobile Friendly, Non-functional requirements-project plan
+
+#### Carl Eric Pellja ####
+Basic player functionalities-categories/search, Quality of Work-User experience
+
+#### Points per feature ####
+Authentication-200p
+Basic player functionalities-300p
+Basic developer functionalities-200p
+Game/service interaction-200p
+Quality of Work-75p
+Non-functional requirements-200p
+Save/load and resolution feature-100p
+3rd party login-100p
+RESTful API-100p
+Mobile Friendly-50p
+
+TOTAL:1525p

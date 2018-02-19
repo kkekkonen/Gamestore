@@ -6,6 +6,8 @@ from django.contrib.auth.models import User
 from django.core import mail
 from django.urls import reverse
 
+
+
 class GameForm(forms.Form):
     name = forms.CharField(label = 'Game Name', max_length=255, required=True,
     error_messages={'required': 'Your game needs a name!'})
@@ -14,7 +16,7 @@ class GameForm(forms.Form):
     image_url = forms.URLField(label = 'Image Url', max_length=1000, required=False)
     description = forms.CharField(widget=forms.Textarea, max_length=1000, label = 'Description', required=True,
     error_messages={'required': 'Your game needs a description!'})
-    price = forms.FloatField(label = 'Price', required = True,
+    price = forms.FloatField(label = 'Price (€)', required = True,
     error_messages={'required': 'Your game needs a price!', 'min_value':'your game cannot cost less than 0!', 'max_value': 'your game cannot cost more than 10000!'}, min_value = 0.0, max_value = 10000.0)
     category = forms.ChoiceField(label = 'Category', required=True, widget=forms.Select(), choices=CATEGORY_CHOICES,
     error_messages={'required': 'Your game needs a category!',})
