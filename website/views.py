@@ -13,7 +13,6 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from website.models import *
 from website.forms import *
 from hashlib import md5
@@ -188,7 +187,6 @@ def add_game(request):
         form = GameForm(data)
         if image_url != "" and not check_image_url(image_url):
             form.add_error("image_url", "invalid image url")
-            form['image_url'].widget.attrs['class'] = "form-control error"
         if form.is_valid():
             game_data = {
                 'name': form.cleaned_data['name'],
