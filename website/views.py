@@ -66,10 +66,11 @@ def user_login(request):
             return redirect(reverse('home'))
         else:
             context = {
-                'message': 'Invalid login! Please try again.',
-                'message_type': 'bg-danger',
+                'result_message': 'Invalid login! Please try again.',
+                'color': 'danger',
+                'display': True,
             }
-            return render(request, 'registration/auth_error.html', context)
+            return render(request, 'registration/login.html', context)
 
 @login_required
 def settings(request):
@@ -79,7 +80,6 @@ def settings(request):
         'last_name': request.user.last_name,
         'email': request.user.email,
     }
-    print(request.POST)
     if request.method == 'GET':
         return render(request, 'account/settings.html', context)
     elif request.method == 'POST':
@@ -91,12 +91,14 @@ def settings(request):
             user.email = request.POST.get('email')
             user.set_password(request.POST.get('password1'))
             user.save()
-            context['message'] = 'Account settings changed successfully!'
-            context['message_type'] = 'bg-success'
-            return redirect(reverse('user_login'), context)
+            context['result_message'] = 'Account settings changed successfully!'
+            context['color'] = 'success'
+            context['display'] = True
+            return render(request, 'registration/login.html', context)
         except:
-            context['message'] = 'Something went wrong! Please try again.'
-            context['mesage_type'] = 'bg-danger'
+            context['result_message'] = 'Something went wrong! Please try again.'
+            context['color'] = 'danger'
+            context['display'] = True
             return render(request, 'account/settings.html', context)
 
 def send_activation_email(request, user, email):
